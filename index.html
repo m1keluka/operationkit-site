@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OperationKit — Mission control for a self-hosted agent fleet</title>
-  <meta name="description" content="Self-hosted mission control for a fleet of autonomous coding agents. Run 25+ governed Claude Code sessions across multi-tenant workspaces — RBAC, personas, and an adversarial review gate — entirely on your own infrastructure. Apache-2.0." />
+  <title>OperationKit: the self-hosted system your agents run on</title>
+  <meta name="description" content="OperationKit keeps your knowledge, open loops, contacts, and files in one self-hosted system, and lets agents from any model work across all of it. You own the whole stack. Apache-2.0." />
   <meta name="theme-color" content="#0c0f14" />
 
   <!-- no-flash theme init: default dark; honor a stored 'light' preference before first paint -->
@@ -16,8 +16,8 @@
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="OperationKit — Mission control for a self-hosted agent fleet" />
-  <meta property="og:description" content="Self-hosted mission control for a fleet of autonomous coding agents. 25+ governed Claude Code sessions on infra you own. Apache-2.0." />
+  <meta property="og:title" content="OperationKit: the self-hosted system your agents run on" />
+  <meta property="og:description" content="Your knowledge, open loops, contacts, and files in one self-hosted system. Agents from any model work across all of it. You own the whole stack." />
   <meta property="og:url" content="https://operationkit.com" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -35,8 +35,8 @@
         <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
       </a>
       <nav class="nav-links" aria-label="Primary">
-        <a class="navlink" href="#system">System</a>
-        <a class="navlink" href="#different">What's different</a>
+        <a class="navlink" href="#lives">What's inside</a>
+        <a class="navlink" href="#runs">Agents</a>
         <a class="navlink" href="#quickstart">Quickstart</a>
         <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
@@ -61,13 +61,12 @@
       </div>
       <div class="wrap hero-inner">
         <div class="status-pill">
-          <i class="live-dot"></i> 25+ agents · one host · your infra
+          <i class="live-dot"></i> Self-hosted · any model · Apache-2.0
         </div>
-        <h1>Mission control for a <span class="accent">self-hosted</span> agent fleet.</h1>
+        <h1>Everything you know, everyone you owe, every file. One system <span class="accent">you own</span>.</h1>
         <p class="hero-oneliner">
-          Self-hosted mission control for a fleet of autonomous coding agents — spin up on
-          your own $6 VPS in minutes, run 25+ governed Claude Code sessions from your phone,
-          and keep every line of code and credential on your own infrastructure.
+          OperationKit holds your knowledge, your open loops, and your contacts in one self-hosted
+          system, and lets agents from any model work across all of it. You own the whole stack.
         </p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="https://github.com/m1keluka/OperationKit" rel="noopener">
@@ -75,188 +74,85 @@
             View on GitHub
           </a>
           <a class="btn btn-ghost" href="https://github.com/m1keluka/OperationKit/blob/main/docs/SELF-HOSTING.md" rel="noopener">
-            Read the self-hosting guide
+            Read the docs
           </a>
         </div>
         <div class="hero-chips" aria-hidden="false">
-          <span class="chip"><i class="cdot"></i> <b>self-hosted</b></span>
-          <span class="chip"><i class="cdot"></i> <b>multi-tenant</b> workspaces</span>
-          <span class="chip"><i class="cdot"></i> RBAC + <b>personas</b></span>
-          <span class="chip"><i class="cdot"></i> adversarial <b>review gate</b></span>
+          <span class="chip"><i class="cdot"></i> <b>second brain</b></span>
+          <span class="chip"><i class="cdot"></i> <b>loops</b></span>
+          <span class="chip"><i class="cdot"></i> <b>connections</b></span>
+          <span class="chip"><i class="cdot"></i> <b>files &amp; docs</b></span>
         </div>
       </div>
     </section>
 
-    <!-- ============ HONEST PRE-RELEASE NOTE ============ -->
-    <section class="section" style="padding-top: 0;">
-      <div class="wrap">
-        <div class="callout reveal" role="note">
-          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
-          </svg>
-          <div>
-            <h3>An honest pre-release note — read this first.</h3>
-            <p>
-              The core runs up to ~25 agents executing shell on a single shared host. That is a real
-              blast radius, and we say so plainly. Current isolation is <span class="mono">per-session git worktrees</span>
-              plus a <span class="mono">pre-write guard hook</span> — enough to stop the common cross-session footgun,
-              not a security sandbox.
-            </p>
-            <p>
-              Per-agent container/sandbox isolation is on the roadmap, not shipped. Until then, run OperationKit
-              on a dedicated, disposable VPS with only the credentials it needs. We document the sharp edges
-              instead of hiding them — that honesty is part of the brand.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ DIFFERENTIATORS (LOCKED ORDER) ============ -->
-    <section class="section" id="fleet" style="padding-top: 8px;">
+    <!-- ============ WHAT LIVES IN IT (the four primitives) ============ -->
+    <section class="section" id="lives" style="padding-top: 40px;">
       <div class="wrap">
         <div class="sec-head reveal">
-          <p class="eyebrow">A fleet, not a tab</p>
-          <h2>Built to govern many agents at once — not babysit one.</h2>
+          <p class="eyebrow">What lives in it</p>
+          <h2>The context your work actually runs on.</h2>
           <p class="lead">
-            Most tools manage one agent, on one machine, for one person. OperationKit is the control
-            plane for a whole fleet. Four things make that real, in this order.
+            Most tools store one of these. OperationKit keeps all four as plain files you own,
+            connected to each other and read by your agents.
           </p>
         </div>
-
-        <div class="diffs">
-          <!-- 1 self-hosted -->
-          <article class="diff reveal">
-            <div class="diff-num">01</div>
-            <div>
-              <h3>Self-hosted by design — your infra, your cost, your data.</h3>
-              <p>
-                OperationKit runs entirely on a server you control: a <span class="hl">$6 VPS</span>, your own
-                Anthropic billing, your own data-residency posture. Nothing routes through a third-party
-                orchestration cloud. This is the one thing a vendor cloud structurally cannot offer — so it leads.
-              </p>
-            </div>
-          </article>
-          <!-- 2 multi-tenant -->
-          <article class="diff reveal">
-            <div class="diff-num">02</div>
-            <div>
-              <h3>A fleet, not a tab — multi-tenant workspaces.</h3>
-              <p>
-                Built for <span class="hl">25+ concurrent sessions</span> organized into multi-tenant
-                <span class="hl">workspaces</span> — separate teams or clients on one install, each with its own
-                objectives and members, without crossing the streams.
-              </p>
-            </div>
-          </article>
-          <!-- 3 RBAC / personas -->
-          <article class="diff reveal">
-            <div class="diff-num">03</div>
-            <div>
-              <h3>Governance is built in, not bolted on.</h3>
-              <p>
-                Role-based access control and per-workspace <span class="hl">personas</span> mean the right people
-                get the right agents with the right context. It's the layer teams and agencies actually pay
-                attention to — and the layer single-user tools skip.
-              </p>
-            </div>
-          </article>
-          <!-- 4 review gate -->
-          <article class="diff reveal">
-            <div class="diff-num">04</div>
-            <div>
-              <h3>An adversarial review gate, not just a diff.</h3>
-              <p>
-                Work produced by an agent can be routed through an automated <span class="hl">adversarial review</span>
-                before it's accepted. Most tools stop at "show the human a diff"; OperationKit treats review as a
-                governed stage of the workflow. The board of objectives is one feature inside that control plane —
-                not the product.
-              </p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ CAPABILITIES GRID ============ -->
-    <section class="section" id="system" style="padding-top:8px;">
-      <div class="wrap">
-        <div class="sec-head reveal">
-          <p class="eyebrow">Not a wrapper</p>
-          <h2>The whole operation, on one host.</h2>
-          <p class="lead">
-            OperationKit isn't a kanban board with agents bolted on. It's the surfaces a real operation
-            needs — agents, knowledge, files, contacts, commitments — wired together and running on a box you own.
-          </p>
-        </div>
-        <div class="capgrid">
-          <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-            <h3>Objectives board</h3>
-            <p>A kanban of agent sessions — planning, working, review, done. Status is read from the live process, not the agent's word for it.</p>
-          </article>
-          <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <h3>Agents &amp; personas</h3>
-            <p>Swappable markdown personas — a CTO, a marketer, a researcher. They're your files: read them, edit them, own them.</p>
-          </article>
-          <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            <h3>Loops</h3>
-            <p>Every commitment, captured: who you're waiting on, what you owe, what's next — auto-pulled from meetings into a mobile board with a daily nudge.</p>
-            <span class="tag">live</span>
-          </article>
-          <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M14.5 9h3.5M14.5 13h3.5M5.5 16a3.5 3.5 0 0 1 7 0"/></svg>
-            <h3>Contacts</h3>
-            <p>A vault-native CRM plus agent-callable B2B sourcing and enrichment — research, find, and export contacts inside an objective.</p>
-          </article>
-          <article class="capcard reveal">
+        <div class="capgrid two">
+          <article class="capcard big reveal">
             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <h3>Second brain</h3>
-            <p>A markdown knowledge base every agent searches and is grounded in automatically. Your decisions and playbooks, on your disk — no vector database required.</p>
+            <p>A markdown knowledge base your agents search and ground every answer in. Your decisions, playbooks, and notes stay plain files you can read, grep, and keep for good. No vector database, no black box.</p>
+            <span class="detail">auto-read into every agent session</span>
           </article>
-          <article class="capcard reveal">
+          <article class="capcard big reveal">
+            <span class="tag">live</span>
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <h3>Loops</h3>
+            <p>The open threads of your work, captured: who you owe, who you're waiting on, what comes next. Pulled from your meetings onto a board you clear from your phone, with a daily nudge on what's overdue.</p>
+            <span class="detail">live today · daily digest</span>
+          </article>
+          <article class="capcard big reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6" r="3"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M10.2 8.3 6.6 15.6M13.8 8.3l3.6 7.3M7.5 18h9"/></svg>
+            <h3>Connections</h3>
+            <p>Every person, deal, and decision, tied to the loops, files, and notes they touch. When the same contact shows up across your work, OperationKit keeps it as one. Your contacts live inside the work, not parked in a separate CRM.</p>
+            <span class="detail">people linked to everything</span>
+          </article>
+          <article class="capcard big reveal">
             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             <h3>Files &amp; docs</h3>
-            <p>Browse and edit the same filesystem your agents read and write, from a built-in docs editor — scoped per workspace so tenants never cross.</p>
-          </article>
-          <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-            <h3>Web terminal</h3>
-            <p>A real shell into the box, from your laptop or your phone. It's your server — nothing is hidden behind a vendor console.</p>
-          </article>
-          <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-            <h3>Delegator mode</h3>
-            <p>One objective fans out into up to five worker sub-agents — each isolated in its own git worktree and independently reviewed before it merges back.</p>
+            <p>Browse and edit the same files your agents read and write, from a built-in editor. Everything is markdown on disk, scoped per workspace so teams and clients never cross.</p>
+            <span class="detail">the filesystem your agents work in</span>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- ============ DEEP DIVES (the innovative trio) ============ -->
-    <section class="section" id="different" style="padding-top:8px;">
+    <!-- ============ WHAT WORKS ON TOP (agents) ============ -->
+    <section class="section" id="runs" style="padding-top:8px;">
       <div class="wrap">
         <div class="sec-head reveal">
-          <p class="eyebrow">Where it's actually different</p>
-          <h2>The parts you won't find in a kanban wrapper.</h2>
+          <p class="eyebrow">What works on top of it</p>
+          <h2>Agents that act on your context, not a vendor's.</h2>
+          <p class="lead">
+            Your knowledge, loops, and connections are the context every agent reads first.
+            The work runs on top of what you already know.
+          </p>
         </div>
 
         <div class="deep">
           <!-- agent builder -->
           <article class="deepblock reveal">
             <div class="deep-body">
-              <h3>Build agents you actually own.</h3>
+              <h3>Build agents you own.</h3>
               <p>
-                An agent is a plain markdown persona — its role, its rules, the skills it can reach. Author one
-                through a guided interview, then edit it like any other file. Flexible by default: it's your file
-                on your disk, not a rigid schema locked inside someone else's platform.
+                An agent is a plain markdown persona: its role, its rules, the skills it can reach. Author one
+                through a guided interview, then edit it like any other file. It stays your file on your disk,
+                not a rigid schema locked inside someone else's platform.
               </p>
               <div class="deep-feats">
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Guided to create, free to change</b> — every agent is version-controlled markdown you own.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Guided to create, free to change.</b> Every agent is version-controlled markdown you own.</span></div>
                 <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Per-workspace overlays, so one persona behaves differently per team or client.</span></div>
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><span class="roadmap"><i class="rdot"></i> Roadmap</span> &nbsp;Record your screen doing a task — the builder watches and drafts an agent that can run it.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><span class="roadmap"><i class="rdot"></i> Roadmap</span> &nbsp;Record your screen doing a task, and the builder drafts an agent that can run it.</span></div>
               </div>
             </div>
             <div class="deep-media">
@@ -268,7 +164,7 @@
 <span class="l"><span class="k">skills:</span> web-search, deep-research, kb</span>
 <span class="l"><span class="k">model:</span> claude-opus-4-8  <span class="c"># swappable</span></span>
 <span class="l"> </span>
-<span class="l"><span class="c"># edit it, version it, branch it —</span></span>
+<span class="l"><span class="c"># edit it, version it, branch it.</span></span>
 <span class="l"><span class="c"># no locked schema, no vendor UI</span></span>
                 </div>
               </div>
@@ -280,24 +176,24 @@
             <div class="deep-body">
               <h3>Pick the model. Keep your context.</h3>
               <p>
-                Run an objective on Claude or OpenAI, and switch a task between them mid-flight with one click.
-                Whichever model runs the job, your agent personas and your knowledge base are injected from your
-                own files first — so your context travels with the work instead of living in a vendor's platform.
+                Run a task on Claude or OpenAI, and switch between them mid-flight with one click. Whichever
+                model runs the job, your personas and your knowledge base load from your own files first. Your
+                context travels with the work instead of living in a vendor's platform.
               </p>
               <div class="deep-feats">
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Choose the model per objective; <b>hot-swap engines</b> without losing the thread.</span></div>
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Personas + second-brain context injected the same way across every model.</span></div>
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>No lock-in</b> — your agents and knowledge are markdown you own, not a provider feature.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Choose the model per task, and <b>hot-swap engines</b> without losing the thread.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Personas and second-brain context load the same way across every model.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>No lock-in.</b> Your agents and knowledge are markdown you own, not a provider feature.</span></div>
               </div>
             </div>
             <div class="deep-media">
               <div class="codeframe">
                 <div class="cf-bar"><i class="d"></i><i class="d"></i><i class="d"></i><span class="nm">objective · engine</span></div>
                 <div class="cf-body">
-<span class="l"><span class="c"># switch the engine mid-objective</span></span>
+<span class="l"><span class="c"># switch the engine mid-task</span></span>
 <span class="l"><span class="k">model:</span> <span class="w">claude-opus-4-8</span>  ⇄  <span class="w">gpt-5.5</span></span>
 <span class="l"> </span>
-<span class="l"><span class="g">✓</span> persona    <span class="c">injected from your files</span></span>
+<span class="l"><span class="g">✓</span> persona    <span class="c">loaded from your files</span></span>
 <span class="l"><span class="g">✓</span> knowledge  <span class="c">second-brain, either way</span></span>
 <span class="l"><span class="g">✓</span> auth       <span class="c">your own subscription</span></span>
                 </div>
@@ -308,17 +204,17 @@
           <!-- review / QA gate -->
           <article class="deepblock reveal">
             <div class="deep-body">
-              <h3>A review gate that runs your app — not just reads the diff.</h3>
+              <h3>A review gate that runs your app.</h3>
               <p>
-                Work an agent produces is handed to a second, fresh-context agent that grades it against acceptance
-                criteria locked before the work began — increasingly by running the change in a throwaway preview
-                rather than trusting the diff. It auto-iterates on failures and tracks its own false-pass rate, so
-                the gate's accuracy is measurable. It's how features like Loops ship without a human re-reading every line.
+                Work an agent produces goes to a second, fresh-context agent that grades it against acceptance
+                criteria locked before the work began. It auto-iterates on failures and tracks its own false-pass
+                rate, so the gate's accuracy is something you can measure. It is how features like Loops ship
+                without a human re-reading every line.
               </p>
               <div class="deep-feats">
                 <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Fresh-context, <b>adversarial</b> review against criteria locked before work starts.</span></div>
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Auto-iterates up to three times, then escalates to a human when it can't.</span></div>
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Tracks its own false-pass rate</b> — it measures whether the validator actually validates.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Auto-iterates up to three times, then escalates to a human when it cannot.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Tracks its own false-pass rate,</b> so you know whether the validator actually validates.</span></div>
                 <div class="feat"><span class="roadmap"><i class="rdot"></i> In active development</span> &nbsp;<span>Expanding to run every change in a live, fresh-seeded preview.</span></div>
               </div>
             </div>
@@ -340,6 +236,86 @@
       </div>
     </section>
 
+    <!-- ============ AND IT'S YOURS (ownership) ============ -->
+    <section class="section ownership" id="yours" style="padding-top:8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">And it's yours</p>
+          <h2>Own the whole stack, end to end.</h2>
+          <p class="lead">
+            Your knowledge, your agents, your infrastructure. OperationKit runs on hardware you control,
+            and every part of it is yours to read, audit, and take with you.
+          </p>
+        </div>
+        <div class="objection reveal" style="max-width:920px;">
+          <div class="obj-list">
+            <div class="obj-item">
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <p><b>Plain files, not a black box.</b> Every agent's memory is markdown you can open, grep, and back up. If you ever leave, your data walks out with you.</p>
+            </div>
+            <div class="obj-item">
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <p><b>Your infrastructure, your keys.</b> Nothing routes through a third-party orchestration cloud, and nothing trains on your work.</p>
+            </div>
+            <div class="obj-item">
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <p><b>Any model, so the system outlasts whichever one you use today.</b> The context is yours; the engine is a choice you can change.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout reveal" role="note" style="margin-top:18px;">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+          </svg>
+          <div>
+            <h3>An honest note on security.</h3>
+            <p>
+              The core runs many agents executing shell on a shared host. That is a real blast radius, and we
+              say so plainly. Today's isolation is <span class="mono">per-session git worktrees</span> plus a
+              <span class="mono">pre-write guard hook</span>. It stops the common cross-session mistake. It is not a security sandbox.
+            </p>
+            <p>
+              Per-agent container isolation is on the roadmap, not shipped. Until then, run OperationKit on a
+              dedicated, disposable host with only the credentials it needs. We document the sharp edges instead of hiding them.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ALSO IN THE BOX ============ -->
+    <section class="section" id="more" style="padding-top:8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">Also in the box</p>
+          <h2>The rest of the operation.</h2>
+        </div>
+        <div class="capgrid">
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+            <h3>Objectives board</h3>
+            <p>A board of agent sessions: planning, working, review, done. Status comes from the live process, not the agent's word for it.</p>
+          </article>
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+            <h3>Delegator mode</h3>
+            <p>One objective fans out into up to five worker sub-agents, each isolated in its own git worktree and reviewed before it merges back.</p>
+          </article>
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h3>Lead sourcing</h3>
+            <p>Agents can search, enrich, and export B2B contacts inside an objective, then file the results straight into your connections.</p>
+          </article>
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <h3>Web terminal</h3>
+            <p>A real shell into the box, from your laptop or your phone. It is your server, with nothing hidden behind a vendor console.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ SEE IT WORK + DOCS ============ -->
     <section class="section" id="see" style="padding-top:8px;">
       <div class="wrap">
@@ -348,19 +324,19 @@
             <p class="eyebrow">Guided, documented, flexible</p>
             <h2>See the whole thing work.</h2>
             <p class="lead">
-              The setup is guided, the docs are real, and the system bends to how you work instead of boxing you in —
-              the part most open-source agent platforms skip. A full walkthrough video is on the way; until then,
-              the self-hosting guide takes you from a bare VPS to a running fleet.
+              The setup is guided, the docs are real, and the system bends to how you work instead of boxing
+              you in. That is the part most open-source agent platforms skip. A full walkthrough video is on the
+              way. Until then, the self-hosting guide takes you from an empty server to a running system.
             </p>
             <div class="hero-ctas">
               <a class="btn btn-primary" href="https://github.com/m1keluka/OperationKit/blob/main/docs/SELF-HOSTING.md" rel="noopener">Read the docs</a>
               <a class="btn btn-ghost" href="https://github.com/m1keluka/OperationKit" rel="noopener">Browse the code</a>
             </div>
           </div>
-          <div class="demo-frame reveal" role="img" aria-label="Product walkthrough video — coming soon">
+          <div class="demo-frame reveal" role="img" aria-label="Product walkthrough video, coming soon">
             <div class="grid"></div>
             <div class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="cap">walkthrough — coming soon</span>
+            <span class="cap">walkthrough · coming soon</span>
           </div>
         </div>
       </div>
@@ -370,28 +346,27 @@
     <section class="section" id="why" style="padding-top: 8px;">
       <div class="wrap">
         <div class="objection reveal">
-          <h2>Why not just use a hosted Claude Code product?</h2>
+          <h2>Why not just use a hosted product?</h2>
           <p class="intro">
-            Hosted Claude Code is excellent — <b>use it if it fits.</b> OperationKit exists for what a vendor
-            cloud structurally can't serve:
+            Hosted coding agents are excellent. <b>Use one if it fits.</b> OperationKit exists for what a vendor
+            cloud cannot serve:
           </p>
           <div class="obj-list">
             <div class="obj-item">
               <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-              <p><b>Your code and credentials never leave your infrastructure.</b> Everything runs on a host you control. Nothing is sent to a third-party orchestration cloud.</p>
+              <p><b>Your work and your data never leave your infrastructure.</b> Everything runs on a host you control. Nothing is sent to a third-party orchestration cloud.</p>
             </div>
             <div class="obj-item">
               <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-              <p><b>Multi-tenant governance.</b> Workspaces, RBAC, per-workspace personas, and a review gate — built for a team or agency running many projects, not a single user.</p>
+              <p><b>One system, not ten tabs.</b> Your knowledge, loops, contacts, files, and agents share the same context, instead of scattering across a vendor's separate products.</p>
             </div>
             <div class="obj-item">
               <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-              <p><b>Your infra, your cost, your rules.</b> One cheap VPS, your own billing, your own data-residency and compliance posture.</p>
+              <p><b>Your infrastructure, your rules.</b> Your own hardware, your own billing, your own data-residency and compliance posture.</p>
             </div>
           </div>
           <p class="closer">
-            If you're a solo dev happy on a vendor cloud, the hosted product is probably the better choice.
-            OperationKit is for keeping the whole operation in-house.
+            If a vendor cloud covers everything you need, use it. OperationKit is for keeping the whole operation in-house.
           </p>
         </div>
       </div>
@@ -402,18 +377,18 @@
       <div class="wrap">
         <div class="quickstart-grid">
           <div class="reveal">
-            <p class="eyebrow">From zero to fleet</p>
-            <h2 style="font-size: clamp(1.7rem,3.4vw,2.2rem); margin-bottom: 14px;">Stand it up on a $6 VPS in minutes.</h2>
+            <p class="eyebrow">From zero to running</p>
+            <h2 style="font-size: clamp(1.7rem,3.4vw,2.2rem); margin-bottom: 14px;">Stand it up with one compose file.</h2>
             <p class="lead" style="margin-bottom: 8px;">
-              One host, one compose file, then drive the board from your laptop or your phone. The snippet is
-              illustrative — the real steps live in the self-hosting guide.
+              One host, one compose file, then run everything from your laptop or your phone. The snippet is
+              illustrative. The real steps live in the self-hosting guide.
             </p>
             <div class="steps">
               <div class="step">
                 <div class="step-n">1</div>
                 <div>
                   <h3>Bring a host.</h3>
-                  <p>Any disposable VPS — a $6/mo box is enough to start. Add your own Anthropic API key or org seats.</p>
+                  <p>Any server you control. Add your own model keys or org seats.</p>
                 </div>
               </div>
               <div class="step">
@@ -426,8 +401,8 @@
               <div class="step">
                 <div class="step-n">3</div>
                 <div>
-                  <h3>Open the board — anywhere.</h3>
-                  <p>Create a workspace, spawn objectives, watch each live session in an embedded terminal from your phone.</p>
+                  <h3>Open it anywhere.</h3>
+                  <p>Create a workspace, spawn objectives, and watch each live session in an embedded terminal from your phone.</p>
                 </div>
               </div>
             </div>
@@ -436,20 +411,20 @@
           <div class="terminal reveal" role="img" aria-label="Example terminal session standing up OperationKit with docker compose">
             <div class="term-bar">
               <i class="tdot"></i><i class="tdot"></i><i class="tdot"></i>
-              <span class="tname">ssh root@your-vps · ~/operationkit</span>
+              <span class="tname">ssh you@your-server · ~/operationkit</span>
             </div>
             <div class="term-body">
-<span class="ln"><span class="cm"># on your own $6 VPS — nothing leaves this host</span></span>
+<span class="ln"><span class="cm"># on a server you control. nothing leaves this host</span></span>
 <span class="ln"><span class="pr">$</span> <span class="cmd">git clone https://github.com/m1keluka/OperationKit.git</span></span>
 <span class="ln"><span class="pr">$</span> <span class="cmd">cd OperationKit && cp .env.example .env</span></span>
-<span class="ln"><span class="cm"># add your own ANTHROPIC_API_KEY in .env, then:</span></span>
+<span class="ln"><span class="cm"># add your own model keys in .env, then:</span></span>
 <span class="ln"><span class="pr">$</span> <span class="cmd">docker compose up <span class="arg">-d</span></span></span>
 <span class="ln"> </span>
 <span class="ln"><span class="ok">✓</span> web        ready  <span class="cm">→ http://localhost:3000</span></span>
-<span class="ln"><span class="ok">✓</span> runtime    ready  <span class="cm">fleet: 0/25 sessions</span></span>
+<span class="ln"><span class="ok">✓</span> runtime    ready  <span class="cm">agents: idle, waiting for work</span></span>
 <span class="ln"><span class="ok">✓</span> review     armed  <span class="cm">adversarial gate enabled</span></span>
 <span class="ln"> </span>
-<span class="ln"><span class="cm"># open the board from your laptop or your phone.</span></span>
+<span class="ln"><span class="cm"># open it from your laptop or your phone.</span></span>
             </div>
           </div>
         </div>
@@ -460,23 +435,23 @@
     <section class="section opencore">
       <div class="wrap reveal">
         <span class="badge">Apache-2.0</span>
-        <p>The core is <b>genuinely free and open under Apache-2.0</b>, and it stays that way.</p>
+        <p>The core is <b>free and open under Apache-2.0</b>, and it stays that way.</p>
       </div>
     </section>
 
     <!-- ============ FINAL CTA ============ -->
     <section class="section finalcta">
       <div class="wrap reveal">
-        <p class="eyebrow" style="display:inline-block;">Keep the operation in-house</p>
-        <h2>Run a governed agent fleet on infrastructure you own.</h2>
-        <p>Read the code, clone it onto a disposable VPS, and see the whole fleet on one board.</p>
+        <p class="eyebrow" style="display:inline-block;">Keep it in-house</p>
+        <h2>Run your operation on infrastructure you own.</h2>
+        <p>Read the code, stand it up on your own server, and put your knowledge, loops, connections, and agents in one place.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="https://github.com/m1keluka/OperationKit" rel="noopener">
             <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
             View on GitHub
           </a>
           <a class="btn btn-ghost" href="https://github.com/m1keluka/OperationKit/blob/main/docs/SELF-HOSTING.md" rel="noopener">
-            Read the self-hosting guide
+            Read the docs
           </a>
         </div>
       </div>
@@ -489,7 +464,7 @@
       <div class="footer-top">
         <div class="footer-logo">
           <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
-          <p>Self-hosted mission control for a fleet of autonomous coding agents.</p>
+          <p>The self-hosted home for your knowledge, loops, connections, and the agents that run on them.</p>
         </div>
         <div class="footer-cols">
           <div class="footer-col">
@@ -500,8 +475,8 @@
           </div>
           <div class="footer-col">
             <h4>Site</h4>
-            <a href="#why">Why self-host</a>
-            <a href="#fleet">The fleet</a>
+            <a href="#lives">What's inside</a>
+            <a href="#runs">Agents</a>
             <a href="#quickstart">Quickstart</a>
           </div>
         </div>
@@ -511,7 +486,7 @@
           <a class="lic-badge" href="https://github.com/m1keluka/OperationKit/blob/main/LICENSE" rel="noopener" aria-label="License: Apache-2.0">
             <span class="lic-k">license</span><span class="lic-v">Apache-2.0</span>
           </a>
-          <span class="prov">Previously run internally under the working codename "Command Center." The codename is retired; the product is OperationKit.</span>
+          <span class="prov">Run internally for a year under the working codename "Command Center." The codename is retired; the product is OperationKit.</span>
         </span>
         <span class="footer-domains">
           <a href="https://operationkit.ai" rel="noopener">operationkit.ai</a> · <a href="https://operationkit.com" rel="noopener">operationkit.com</a>
@@ -537,7 +512,7 @@
       els.forEach(function (el) { io.observe(el); });
     })();
 
-    // Theme toggle — persists to localStorage, updates the address-bar color.
+    // Theme toggle: persists to localStorage, updates the address-bar color.
     (function () {
       var root = document.documentElement;
       var btn = document.getElementById('themeToggle');
