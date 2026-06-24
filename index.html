@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OperationKit: the self-hosted system your agents run on</title>
-  <meta name="description" content="OperationKit keeps your knowledge, open loops, contacts, and files in one self-hosted system, and lets agents from any model work across all of it. You own the whole stack. Apache-2.0." />
+  <title>OperationKit: an operating system you own, powered by agents</title>
+  <meta name="description" content="An agent-powered operating system for your work. Self-hosted, model-agnostic, and portable: build or bring any agent, run on any model, and take your knowledge anywhere. Apache-2.0." />
   <meta name="theme-color" content="#0c0f14" />
 
   <!-- no-flash theme init: default dark; honor a stored 'light' preference before first paint -->
@@ -16,8 +16,8 @@
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="OperationKit: the self-hosted system your agents run on" />
-  <meta property="og:description" content="Your knowledge, open loops, contacts, and files in one self-hosted system. Agents from any model work across all of it. You own the whole stack." />
+  <meta property="og:title" content="OperationKit: an operating system you own, powered by agents" />
+  <meta property="og:description" content="An agent-powered operating system for your work. Self-hosted and model-agnostic. Build or bring any agent, run on any model, and take your knowledge anywhere." />
   <meta property="og:url" content="https://operationkit.com" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -35,8 +35,8 @@
         <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
       </a>
       <nav class="nav-links" aria-label="Primary">
-        <a class="navlink" href="#lives">What's inside</a>
-        <a class="navlink" href="#runs">Agents</a>
+        <a class="navlink" href="#agents">Agents</a>
+        <a class="navlink" href="#run">Run anywhere</a>
         <a class="navlink" href="#quickstart">Quickstart</a>
         <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
@@ -63,10 +63,11 @@
         <div class="status-pill">
           <i class="live-dot"></i> Self-hosted · any model · Apache-2.0
         </div>
-        <h1>Everything you know, everyone you owe, every file. One system <span class="accent">you own</span>.</h1>
+        <h1>Own your <span class="accent">operating system</span>.</h1>
         <p class="hero-oneliner">
-          OperationKit holds your knowledge, your open loops, and your contacts in one self-hosted
-          system, and lets agents from any model work across all of it. You own the whole stack.
+          OperationKit is an agent-powered operating system for your work, running on infrastructure
+          you own. It works with any AI model, today's and the ones still coming, and your agents and
+          knowledge come with you wherever you go.
         </p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="https://github.com/m1keluka/OperationKit" rel="noopener">
@@ -78,80 +79,39 @@
           </a>
         </div>
         <div class="hero-chips" aria-hidden="false">
-          <span class="chip"><i class="cdot"></i> <b>second brain</b></span>
-          <span class="chip"><i class="cdot"></i> <b>loops</b></span>
-          <span class="chip"><i class="cdot"></i> <b>connections</b></span>
-          <span class="chip"><i class="cdot"></i> <b>files &amp; docs</b></span>
+          <span class="chip"><i class="cdot"></i> <b>agents</b></span>
+          <span class="chip"><i class="cdot"></i> <b>any model</b></span>
+          <span class="chip"><i class="cdot"></i> runs <b>anywhere</b></span>
+          <span class="chip"><i class="cdot"></i> <b>self-hosted</b></span>
         </div>
       </div>
     </section>
 
-    <!-- ============ WHAT LIVES IN IT (the four primitives) ============ -->
-    <section class="section" id="lives" style="padding-top: 40px;">
+    <!-- ============ AGENTS (the heart) ============ -->
+    <section class="section" id="agents" style="padding-top: 40px;">
       <div class="wrap">
         <div class="sec-head reveal">
-          <p class="eyebrow">What lives in it</p>
-          <h2>The context your work actually runs on.</h2>
+          <p class="eyebrow">The heart of it</p>
+          <h2>Agents you build, bring, and own.</h2>
           <p class="lead">
-            Most tools store one of these. OperationKit keeps all four as plain files you own,
-            connected to each other and read by your agents.
-          </p>
-        </div>
-        <div class="capgrid two">
-          <article class="capcard big reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            <h3>Second brain</h3>
-            <p>A markdown knowledge base your agents search and ground every answer in. Your decisions, playbooks, and notes stay plain files you can read, grep, and keep for good. No vector database, no black box.</p>
-            <span class="detail">auto-read into every agent session</span>
-          </article>
-          <article class="capcard big reveal">
-            <span class="tag">live</span>
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            <h3>Loops</h3>
-            <p>The open threads of your work, captured: who you owe, who you're waiting on, what comes next. Pulled from your meetings onto a board you clear from your phone, with a daily nudge on what's overdue.</p>
-            <span class="detail">live today · daily digest</span>
-          </article>
-          <article class="capcard big reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6" r="3"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M10.2 8.3 6.6 15.6M13.8 8.3l3.6 7.3M7.5 18h9"/></svg>
-            <h3>Connections</h3>
-            <p>Every person, deal, and decision, tied to the loops, files, and notes they touch. When the same contact shows up across your work, OperationKit keeps it as one. Your contacts live inside the work, not parked in a separate CRM.</p>
-            <span class="detail">people linked to everything</span>
-          </article>
-          <article class="capcard big reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            <h3>Files &amp; docs</h3>
-            <p>Browse and edit the same files your agents read and write, from a built-in editor. Everything is markdown on disk, scoped per workspace so teams and clients never cross.</p>
-            <span class="detail">the filesystem your agents work in</span>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ WHAT WORKS ON TOP (agents) ============ -->
-    <section class="section" id="runs" style="padding-top:8px;">
-      <div class="wrap">
-        <div class="sec-head reveal">
-          <p class="eyebrow">What works on top of it</p>
-          <h2>Agents that act on your context, not a vendor's.</h2>
-          <p class="lead">
-            Your knowledge, loops, and connections are the context every agent reads first.
-            The work runs on top of what you already know.
+            Every agent is a plain file. Write your own in a guided flow, bring one you already have,
+            and run it on whatever model you choose. Nothing is trapped in a vendor's format.
           </p>
         </div>
 
         <div class="deep">
-          <!-- agent builder -->
+          <!-- build your own -->
           <article class="deepblock reveal">
             <div class="deep-body">
-              <h3>Build agents you own.</h3>
+              <h3>Build an agent in a guided flow.</h3>
               <p>
-                An agent is a plain markdown persona: its role, its rules, the skills it can reach. Author one
-                through a guided interview, then edit it like any other file. It stays your file on your disk,
-                not a rigid schema locked inside someone else's platform.
+                Describe what you want an agent to do, and a guided builder turns it into a persona: its
+                role, its rules, the skills and tools it can reach. The result is a markdown file you read,
+                edit, and version like any other.
               </p>
               <div class="deep-feats">
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Guided to create, free to change.</b> Every agent is version-controlled markdown you own.</span></div>
-                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Per-workspace overlays, so one persona behaves differently per team or client.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>A guided interview, not a config form. You answer questions, it writes the agent.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Every agent is <b>markdown you own</b> and can change at any time.</span></div>
                 <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><span class="roadmap"><i class="rdot"></i> Roadmap</span> &nbsp;Record your screen doing a task, and the builder drafts an agent that can run it.</span></div>
               </div>
             </div>
@@ -171,6 +131,52 @@
             </div>
           </article>
 
+          <!-- bring any agent -->
+          <article class="deepblock reveal">
+            <div class="deep-body">
+              <h3>Bring agents you already have.</h3>
+              <p>
+                Build an agent and it is a file. Bring one from somewhere else and it is a file too. Because
+                every persona is plain markdown, your agents move between tools instead of locking you into one.
+              </p>
+              <div class="deep-feats">
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Agents are <b>portable markdown</b>, not bound to one vendor's format.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><span class="roadmap"><i class="rdot"></i> Roadmap</span> &nbsp;One-click import that converts a Claude Code or Codex agent into OperationKit's format.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><span class="roadmap"><i class="rdot"></i> Roadmap</span> &nbsp;A shared library of community agents you pull from by file. Open, not a walled store.</span></div>
+              </div>
+            </div>
+            <div class="deep-media">
+              <div class="codeframe">
+                <div class="cf-bar"><i class="d"></i><i class="d"></i><i class="d"></i><span class="nm">bring-an-agent</span></div>
+                <div class="cf-body">
+<span class="l"><span class="c"># agents are files. bring your own.</span></span>
+<span class="l"><span class="pr">$</span> cp ~/.claude/agents/reviewer.md \</span>
+<span class="l">     ~/ai-workspace/agents/</span>
+<span class="l"><span class="g">✓</span> reviewer   ready to run</span>
+<span class="l"> </span>
+<span class="l"><span class="c"># roadmap: one-click import + convert</span></span>
+<span class="l"><span class="c"># roadmap: pull from a shared library</span></span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHAT WORKS ON TOP (agents) ============ -->
+    <section class="section" id="runs" style="padding-top:8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">Future-proof</p>
+          <h2>Run on any model, now and next.</h2>
+          <p class="lead">
+            Your agents and your knowledge load from your own files first, so they behave the same on
+            whatever runs underneath. Pick the model today, and point at a better one tomorrow.
+          </p>
+        </div>
+
+        <div class="deep">
           <!-- model agnostic -->
           <article class="deepblock reveal">
             <div class="deep-body">
@@ -231,6 +237,70 @@
                 </div>
               </div>
             </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RUN IT ANYWHERE ============ -->
+    <section class="section" id="run" style="padding-top:8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">Run it anywhere</p>
+          <h2>From your phone, or on its own.</h2>
+          <p class="lead">
+            It runs on your server, but you do not have to sit at one. Drive it from your pocket, or set it
+            to run without you.
+          </p>
+        </div>
+        <div class="capgrid">
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.2"/><line x1="11" y1="18.5" x2="13" y2="18.5"/></svg>
+            <h3>From your phone</h3>
+            <p>The whole system is built for a phone screen. Spawn work, watch a live session, and run your operation from anywhere.</p>
+          </article>
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <h3>Web terminal</h3>
+            <p>A real shell into the box, from your laptop or your phone. It is your server, with nothing hidden behind a vendor console.</p>
+          </article>
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+            <h3>Autonomous jobs</h3>
+            <p>Schedule an agent to run on its own. Set a job on a cron, and it runs, files its results, and reports back without you.</p>
+          </article>
+          <article class="capcard reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5z"/></svg>
+            <h3>Messaging <span class="roadmap" style="margin:0 0 0 4px;"><i class="rdot"></i> Roadmap</span></h3>
+            <p>Drive it from the apps you already live in. Two-way control over Telegram and WhatsApp is on the roadmap.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ YOUR KNOWLEDGE, PORTABLE ============ -->
+    <section class="section" id="knowledge" style="padding-top:8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">Portable by design</p>
+          <h2>Your knowledge comes with you.</h2>
+          <p class="lead">
+            Everything OperationKit knows is plain markdown on your disk. Read it, grep it, back it up,
+            and take it to the next machine or the next model.
+          </p>
+        </div>
+        <div class="capgrid two">
+          <article class="capcard big reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <h3>Second brain</h3>
+            <p>A markdown knowledge base your agents search and ground every answer in. Your decisions, playbooks, and notes stay plain files, not rows in a vector database you cannot read.</p>
+            <span class="detail">auto-read into every agent session</span>
+          </article>
+          <article class="capcard big reveal">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <h3>Files &amp; docs</h3>
+            <p>Browse and edit the same files your agents read and write, from a built-in editor. Markdown on disk, scoped per workspace so teams and clients never cross.</p>
+            <span class="detail">the filesystem your agents work in</span>
           </article>
         </div>
       </div>
@@ -303,14 +373,14 @@
             <p>One objective fans out into up to five worker sub-agents, each isolated in its own git worktree and reviewed before it merges back.</p>
           </article>
           <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <h3>Lead sourcing</h3>
-            <p>Agents can search, enrich, and export B2B contacts inside an objective, then file the results straight into your connections.</p>
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <h3>Loops</h3>
+            <p>Track the open threads of your work: who you owe, who you're waiting on. Pulled from meetings onto a board with a daily nudge.</p>
           </article>
           <article class="capcard reveal">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-            <h3>Web terminal</h3>
-            <p>A real shell into the box, from your laptop or your phone. It is your server, with nothing hidden behind a vendor console.</p>
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6" r="3"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M10.2 8.3 6.6 15.6M13.8 8.3l3.6 7.3M7.5 18h9"/></svg>
+            <h3>Connections</h3>
+            <p>Keep people, deals, and decisions linked to the work they touch, so the same contact stays one record across everything.</p>
           </article>
         </div>
       </div>
@@ -464,7 +534,7 @@
       <div class="footer-top">
         <div class="footer-logo">
           <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
-          <p>The self-hosted home for your knowledge, loops, connections, and the agents that run on them.</p>
+          <p>An agent-powered operating system for your work. Self-hosted, model-agnostic, and yours.</p>
         </div>
         <div class="footer-cols">
           <div class="footer-col">
@@ -475,8 +545,8 @@
           </div>
           <div class="footer-col">
             <h4>Site</h4>
-            <a href="#lives">What's inside</a>
-            <a href="#runs">Agents</a>
+            <a href="#agents">Agents</a>
+            <a href="#run">Run anywhere</a>
             <a href="#quickstart">Quickstart</a>
           </div>
         </div>
