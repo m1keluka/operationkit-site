@@ -1,0 +1,13 @@
+/* OperationKit showcase — self-hosted fonts (no CDN dependency). Paths are
+   relative to /showcase/, so direction files in /showcase/directions/ link this
+   with ../fonts.css and the url() below resolves against THIS file's location. */
+@font-face{font-family:Geist;src:url(fonts/geist-sans-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Geist;src:url(fonts/geist-sans-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:Geist;src:url(fonts/geist-sans-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:Geist;src:url(fonts/geist-sans-700.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:Inter;src:url(fonts/inter-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Inter;src:url(fonts/inter-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:Inter;src:url(fonts/inter-600.woff2) format("woff2");font-weight:600;font-display:swap}

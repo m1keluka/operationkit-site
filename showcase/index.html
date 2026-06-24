@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>OperationKit — Design Showcase</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="../favicon-caret.svg" />
+<link rel="stylesheet" href="fonts.css" />
+<style>
+:root{
+  --ok-signal:#ff5a1f; --ok-ember:#d9430d;
+  --surface-0:#0c0f14; --surface-1:#12161d; --surface-2:#161b22; --surface-3:#1e242d; --surface-4:#28303b;
+  --fg-0:#f3f5f7; --fg-1:#c2c8d2; --fg-2:#8a93a3; --fg-3:#5b6472;
+  --line:#222936; --line-soft:#1b212b; --line-strong:#2c3543;
+  --accent:var(--ok-signal); --accent-hover:#ff6f3c; --accent-press:var(--ok-ember); --accent-fg:#fff;
+  --accent-tint:rgba(255,90,31,.12); --accent-line:rgba(255,90,31,.32);
+  --ok-verify:#1fb877; --ok-amber:#e6a700; --ok-alarm:#e5564b;
+  --font-display:Geist,"Inter Tight",system-ui,sans-serif;
+  --font-body:Inter,system-ui,-apple-system,sans-serif;
+  --font-mono:"Geist Mono","JetBrains Mono",ui-monospace,monospace;
+  --r-sm:6px; --r-md:8px; --r-lg:11px; --r-xl:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--surface-0);color:var(--fg-1);font-family:var(--font-body);font-size:14px;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100%}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+h1,h2,h3{font-family:var(--font-display);color:var(--fg-0);margin:0;letter-spacing:-.02em}
+.mono{font-family:var(--font-mono)}
+a{color:var(--accent-hover);text-decoration:none}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface-1);position:sticky;top:0;z-index:30;flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-mono);font-weight:500;color:var(--fg-0);font-size:15px;white-space:nowrap}
+.brand .caret{color:var(--accent);font-weight:600;font-size:17px}
+.brand small{color:var(--fg-2);font-weight:400}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-2);display:flex;align-items:center;gap:7px}
+.eyebrow::before{content:"›";color:var(--accent);font-weight:600}
+.spacer{flex:1}
+
+/* segmented controls */
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r-md);overflow:hidden;background:var(--surface-2)}
+.seg button{appearance:none;border:0;background:transparent;color:var(--fg-2);font-family:var(--font-mono);font-size:12.5px;padding:8px 13px;cursor:pointer;border-right:1px solid var(--line-soft);transition:background .12s,color .12s;white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--fg-0);background:var(--surface-3)}
+.seg button[aria-pressed="true"]{color:var(--accent-fg);background:var(--accent)}
+.seg.ghost button[aria-pressed="true"]{color:var(--accent-hover);background:var(--accent-tint)}
+.ctl-label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);margin-right:7px}
+.ctl{display:inline-flex;align-items:center;gap:0}
+.controls{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+
+/* ---------- direction meta band ---------- */
+.band{display:flex;gap:16px;align-items:flex-start;padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface-0)}
+.band .tag{flex:none;font-family:var(--font-mono);font-weight:600;font-size:12px;color:var(--accent-fg);background:var(--accent);border-radius:var(--r-sm);padding:5px 9px;letter-spacing:.04em}
+.band .why{color:var(--fg-1);font-size:13px;line-height:1.55;max-width:none}
+.band .why b{color:var(--fg-0);font-weight:600}
+.band .lean{margin-top:5px;font-family:var(--font-mono);font-size:11.5px;color:var(--fg-2)}
+.band .lean .k{color:var(--accent-hover)}
+
+/* ---------- stage ---------- */
+.stage{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:26px;overflow:auto;background:
+  radial-gradient(120% 80% at 50% -10%, rgba(255,90,31,.05), transparent 60%), var(--surface-0)}
+.frame-wrap{display:flex;flex-direction:column;gap:10px;align-items:center}
+.frame-wrap .cap{font-family:var(--font-mono);font-size:11px;color:var(--fg-3);letter-spacing:.06em}
+iframe{border:0;background:var(--surface-0);display:block}
+/* desktop frame */
+.dev-desktop{width:1180px;max-width:100%;height:760px;border:1px solid var(--line-strong);border-radius:var(--r-lg);box-shadow:0 24px 60px -20px rgba(0,0,0,.7);overflow:hidden}
+/* mobile frame — a phone shell */
+.phone{width:390px;height:760px;border:10px solid #05070a;border-radius:38px;box-shadow:0 24px 60px -16px rgba(0,0,0,.75),0 0 0 1px var(--line-strong);overflow:hidden;background:#000;position:relative}
+.phone iframe{width:100%;height:100%;border-radius:28px}
+
+/* ---------- compare grid ---------- */
+.compare{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;width:100%;max-width:1500px}
+.compare .col{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface-1)}
+.compare .col-head{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.compare .col-head .dot{width:9px;height:9px;border-radius:50%}
+.compare .col-head .nm{font-family:var(--font-display);font-weight:600;color:var(--fg-0);font-size:13.5px}
+.compare .col-head .sub{font-family:var(--font-mono);font-size:10.5px;color:var(--fg-3);margin-left:auto}
+.compare .col iframe{width:100%;height:560px}
+.compare .rationale{padding:12px 13px;border-top:1px solid var(--line);font-size:12px;line-height:1.5;color:var(--fg-2);background:var(--surface-1)}
+.compare .rationale b{color:var(--fg-0);font-weight:600}
+.compare-note{grid-column:1/-1;font-family:var(--font-mono);font-size:11.5px;color:var(--fg-2);text-align:center;padding:4px}
+.compare-note .k{color:var(--accent-hover)}
+
+.hint{font-family:var(--font-mono);font-size:11px;color:var(--fg-3);padding:0 22px 14px;text-align:center}
+.openraw{font-family:var(--font-mono);font-size:11px;color:var(--fg-2)}
+.openraw a{color:var(--accent-hover)}
+
+@media (max-width:1240px){ .dev-desktop{width:100%;height:70vh} .compare{grid-template-columns:1fr} .compare .col iframe{height:480px} }
+@media (max-width:680px){ .topbar{gap:10px} .band{flex-direction:column} }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <span class="brand"><span class="caret">›</span> operationkit <small>/ design showcase</small></span>
+  <div class="spacer"></div>
+  <div class="controls">
+    <div class="ctl"><span class="ctl-label">Direction</span>
+      <div class="seg" id="seg-dir">
+        <button data-dir="mission-control" aria-pressed="true">A · Mission Control</button>
+        <button data-dir="terminal-tui">B · Terminal</button>
+        <button data-dir="flow-canvas">C · Flow Canvas</button>
+        <button data-dir="__compare">Compare ▦</button>
+      </div>
+    </div>
+    <div class="ctl"><span class="ctl-label">Screen</span>
+      <div class="seg ghost" id="seg-screen">
+        <button data-screen="board" aria-pressed="true">Board</button>
+        <button data-screen="session">Session</button>
+        <button data-screen="objective">Objective</button>
+      </div>
+    </div>
+    <div class="ctl" id="ctl-frame"><span class="ctl-label">Frame</span>
+      <div class="seg ghost" id="seg-frame">
+        <button data-frame="desktop" aria-pressed="true">Desktop</button>
+        <button data-frame="mobile">Mobile</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="band" id="band"></section>
+
+<main class="stage" id="stage"></main>
+
+<p class="hint" id="hint"></p>
+
+<script>
+const DIRS = {
+  "mission-control": {
+    tag:"A", name:"Mission Control", file:"directions/mission-control.html", dot:"#5b9df0",
+    why:"<b>Clean dark ops dashboard — Linear restraint × Vercel hairlines.</b> A denser, quieter board with circular status glyphs (pie-fill while working), agent identity as a left tile, a ⌘K command palette as the primary verb, and a status dot that pulses only while a session runs. No canvas. The lowest-risk path — it ships and feels right tomorrow.",
+    rationale:"<b>The spine.</b> Refines what exists; reuses the most code. Strongest answer to “VERY simple.”"
+  },
+  "terminal-tui": {
+    tag:"B", name:"Terminal-Forward", file:"directions/terminal-tui.html", dot:"#e0a458",
+    why:"<b>Terminal-forward / TUI — k9s × lazygit × Warp.</b> Monospace-dominant, navigated by a <span class='mono'>:command</span> prompt and single-key actions with a persistent bottom keybind bar. Objectives are dense tabular rows with status glyphs and hover actions; session output renders as Warp-style bordered blocks. The bold, high-conviction pole.",
+    rationale:"<b>The bold pole.</b> Most distinctive operator cockpit. Needs a tasteful touch fallback on mobile."
+  },
+  "flow-canvas": {
+    tag:"C", name:"Flow Canvas", file:"directions/flow-canvas.html", dot:"#ff5a1f",
+    why:"<b>Flow canvas — n8n × Railway.</b> A dotted-grid canvas where objectives/sessions are node-cards with port dots; bezier edges encode linkage (parent→child, branch→PR) and go live-orange + animated while a session runs. Pan/zoom, collapsible workspace groups, a “+ node” palette — with a board/list toggle. Most impressive; kept low-density to stay simple.",
+    rationale:"<b>The optional graph view.</b> Layer on top of A. Most impressive; highest complexity — scope as one view."
+  },
+};
+const LEAN = "<span class='k'>CTO lean:</span> A is the spine · C is an optional graph view layered on top · B is the bold pole — react to a recommendation, not just a menu.";
+
+const state = { dir:"mission-control", screen:"board", frame:"desktop" };
+const $=(s,r=document)=>r.querySelector(s);
+const stage=$("#stage"), band=$("#band"), hint=$("#hint"), ctlFrame=$("#ctl-frame");
+
+function press(segId, attr, val){
+  document.querySelectorAll("#"+segId+" button").forEach(b=>{
+    b.setAttribute("aria-pressed", String(b.dataset[attr]===val));
+  });
+}
+function frameWrap(dirKey, screen, frame, label){
+  const d=DIRS[dirKey];
+  const src=`${d.file}?screen=${screen}&frame=${frame}`;
+  if(frame==="mobile"){
+    return `<div class="frame-wrap"><div class="phone"><iframe loading="lazy" title="${d.name} ${screen} mobile" src="${src}"></iframe></div><div class="cap">${label||d.name} · ${screen} · 390px</div></div>`;
+  }
+  return `<div class="frame-wrap"><div class="dev-desktop"><iframe loading="lazy" title="${d.name} ${screen} desktop" src="${src}"></iframe></div><div class="cap">${label||d.name} · ${screen} · desktop</div></div>`;
+}
+function render(){
+  const compare = state.dir==="__compare";
+  ctlFrame.style.display = compare ? "none" : "";
+  if(compare){
+    band.innerHTML = `<span class="tag" style="background:var(--surface-3);color:var(--accent-hover)">▦</span>
+      <div><div class="why"><b>Side-by-side comparison.</b> The same screen across all three directions — pick the spine, then dial it in. Each column carries its rationale.</div>
+      <div class="lean">${LEAN}</div></div>`;
+    const cols = Object.keys(DIRS).map(k=>{
+      const d=DIRS[k];
+      return `<div class="col">
+        <div class="col-head"><span class="dot" style="background:${d.dot}"></span><span class="nm">${d.tag} · ${d.name}</span><span class="sub">${state.screen}</span></div>
+        <iframe loading="lazy" title="${d.name} ${state.screen}" src="${d.file}?screen=${state.screen}&frame=desktop"></iframe>
+        <div class="rationale">${d.rationale}</div>
+      </div>`;
+    }).join("");
+    stage.innerHTML = `<div class="compare">${cols}<div class="compare-note">Comparing <span class="k">${state.screen}</span> · switch screens above · open any direction full-size from its tab</div></div>`;
+    hint.innerHTML = `Self-contained static mockups · placeholder data · <span class="openraw"><a href="${DIRS["mission-control"].file}?screen=board" target="_blank" rel="noopener">open a direction in a new tab ↗</a></span>`;
+    return;
+  }
+  const d=DIRS[state.dir];
+  band.innerHTML = `<span class="tag">${d.tag}</span>
+    <div><div class="why">${d.why}</div><div class="lean">${LEAN}</div></div>`;
+  stage.innerHTML = frameWrap(state.dir, state.screen, state.frame);
+  hint.innerHTML = `Self-contained static mockup · placeholder data · <span class="openraw"><a href="${d.file}?screen=${state.screen}&frame=${state.frame}" target="_blank" rel="noopener">open this screen in a new tab ↗</a></span>`;
+}
+
+$("#seg-dir").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  state.dir=b.dataset.dir; press("seg-dir","dir",state.dir); render();
+});
+$("#seg-screen").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  state.screen=b.dataset.screen; press("seg-screen","screen",state.screen); render();
+});
+$("#seg-frame").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  state.frame=b.dataset.frame; press("seg-frame","frame",state.frame); render();
+});
+render();
+</script>
+</body>
+</html>

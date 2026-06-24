@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OperationKit — Terminal / TUI</title>
+<link rel="icon" href="../../favicon-caret.svg">
+<link rel="stylesheet" href="../fonts.css">
+<style>
+:root{
+  --ok-signal:#ff5a1f; --ok-ember:#d9430d; --ok-carbon:#0e1116;
+  --surface-0:#0c0f14; --surface-1:#12161d; --surface-2:#161b22; --surface-3:#1e242d; --surface-4:#28303b;
+  --fg-0:#f3f5f7; --fg-1:#c2c8d2; --fg-2:#8a93a3; --fg-3:#5b6472;
+  --line:#222936; --line-soft:#1b212b; --line-strong:#2c3543;
+  --accent:var(--ok-signal); --accent-hover:#ff6f3c; --accent-press:var(--ok-ember); --accent-fg:#ffffff;
+  --accent-tint:rgba(255,90,31,.12); --accent-line:rgba(255,90,31,.32);
+  --ok-verify:#1fb877; --ok-amber:#e6a700; --ok-alarm:#e5564b;
+  --st-planning:#9b8cf0; --st-queue:#8b8a84; --st-working:#5b9df0; --st-ai:#46c2b6; --st-review:#e0a458; --st-human:var(--accent); --st-done:var(--ok-verify); --st-blocked:#e5564b;
+  --agent-cto:#6f9ad8; --agent-cmo:#d389b0; --agent-coo:#6fb58c; --agent-cfo:#d6a24e; --agent-general:#8c8a92;
+  --font-display:Geist,"Inter Tight",system-ui,sans-serif; --font-body:Inter,system-ui,sans-serif; --font-mono:"Geist Mono","JetBrains Mono",ui-monospace,monospace;
+  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:11px; --r-xl:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--surface-0);
+  color:var(--fg-1);
+  font-family:var(--font-mono);
+  font-size:13px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  background-image:
+    radial-gradient(1200px 500px at 80% -10%, rgba(255,90,31,.05), transparent 60%),
+    linear-gradient(transparent 0, transparent calc(100% - 1px), rgba(255,255,255,.012) 100%);
+}
+::selection{background:var(--accent-tint);color:var(--fg-0)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--surface-0)}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:6px;border:2px solid var(--surface-0)}
+::-webkit-scrollbar-thumb:hover{background:var(--surface-4)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.mono{font-family:var(--font-mono)}
+.dim{color:var(--fg-2)}
+.dim3{color:var(--fg-3)}
+
+/* ---- layout shells ---------------------------------------------------- */
+#root{display:block}
+.tui{
+  display:flex;flex-direction:column;
+  min-height:100vh;
+  max-width:1280px;margin:0 auto;
+  border-left:1px solid var(--line-soft);border-right:1px solid var(--line-soft);
+  background:linear-gradient(180deg,var(--surface-0),#0a0d12);
+}
+
+/* ---- context strip (k9s top) ----------------------------------------- */
+.ctx{
+  display:flex;align-items:center;flex-wrap:wrap;gap:0;
+  padding:10px 16px;
+  border-bottom:1px solid var(--line);
+  background:var(--surface-1);
+  font-size:12px;
+}
+.ctx .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;color:var(--fg-0);font-size:14px;letter-spacing:.2px;margin-right:18px}
+.ctx .brand .glyph{color:var(--accent)}
+.ctx .kv{display:inline-flex;gap:6px;margin-right:18px;white-space:nowrap}
+.ctx .kv b{color:var(--fg-3);font-weight:500}
+.ctx .kv span{color:var(--fg-1)}
+.ctx .live{color:var(--st-working)}
+.ctx .spacer{flex:1}
+.ctx .summary{display:inline-flex;gap:14px;white-space:nowrap}
+.ctx .summary .need{color:var(--accent-hover)}
+.ctx .summary .blk{color:var(--st-blocked)}
+.ctx .summary .done{color:var(--st-done)}
+
+/* ---- command bar ----------------------------------------------------- */
+.cmdwrap{padding:12px 16px 6px;border-bottom:1px solid var(--line-soft)}
+.cmd{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface-0);
+  border:1px solid var(--line-strong);
+  border-radius:var(--r-sm);
+  padding:9px 12px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.3);
+}
+.cmd:focus-within{border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-tint)}
+.cmd .colon{color:var(--accent);font-weight:600;font-size:15px}
+.cmd input{
+  flex:1;background:transparent;border:0;outline:0;
+  color:var(--fg-0);font-family:var(--font-mono);font-size:14px;
+}
+.cmd input::placeholder{color:var(--fg-3)}
+.caret{display:inline-block;width:8px;height:16px;background:var(--accent);margin-left:-4px;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.ghosts{padding:6px 2px 2px;color:var(--fg-3);font-size:11.5px;letter-spacing:.2px}
+.ghosts code{color:var(--fg-2);background:var(--surface-2);padding:1px 6px;border-radius:var(--r-xs);margin-right:6px}
+
+/* ---- category chips -------------------------------------------------- */
+.chips{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 10px}
+.chip{
+  font-family:var(--font-mono);font-size:12px;
+  color:var(--fg-2);
+  background:var(--surface-1);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  padding:4px 10px;
+  display:inline-flex;gap:8px;align-items:center;
+  user-select:none;
+}
+.chip:hover{border-color:var(--line-strong);color:var(--fg-1)}
+.chip.on{color:var(--fg-0);border-color:var(--accent-line);background:var(--accent-tint)}
+.chip .n{color:var(--fg-3);font-size:11px}
+.chip.on .n{color:var(--accent-hover)}
+
+/* ---- objective table (k9s) ------------------------------------------- */
+.tablewrap{flex:1;padding:0 16px 16px}
+.thead,.trow{
+  display:grid;
+  grid-template-columns:30px 86px 1fr 64px 150px 46px 84px 64px 120px;
+  align-items:center;
+  gap:10px;
+  padding:0 8px;
+}
+.thead{
+  position:sticky;top:0;z-index:3;
+  height:30px;
+  font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--fg-3);
+  background:var(--surface-0);
+  border-bottom:1px solid var(--line);
+}
+.trow{
+  height:30px;min-height:30px;
+  font-size:12.5px;
+  color:var(--fg-1);
+  border-bottom:1px solid var(--line-soft);
+  position:relative;
+  cursor:pointer;
+}
+.trow:nth-child(even){background:rgba(255,255,255,.012)}
+.trow:hover{background:var(--accent-tint)}
+.trow.need{box-shadow:inset 2px 0 0 var(--accent)}
+.trow.blocked{box-shadow:inset 2px 0 0 var(--st-blocked)}
+.cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-status{display:flex;align-items:center;gap:0;font-size:14px}
+.c-key{color:var(--fg-3);font-size:11px;text-align:center}
+.trow:hover .c-key{color:var(--accent-hover)}
+.c-id{color:var(--fg-2);font-weight:500}
+.c-obj{color:var(--fg-0)}
+.c-agent{font-weight:600}
+.c-branch{color:var(--fg-2)}
+.c-sess,.c-cost,.c-age{text-align:right;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.c-cost{color:var(--fg-1)}
+.glyph{font-size:13px;line-height:1}
+.g-planning{color:var(--st-planning)} .g-queue{color:var(--st-queue)} .g-working{color:var(--st-working)}
+.g-ai{color:var(--st-ai)} .g-review{color:var(--st-review)} .g-human{color:var(--st-human)}
+.g-done{color:var(--st-done)} .g-blocked{color:var(--st-blocked)}
+.ag-cto{color:var(--agent-cto)} .ag-cmo{color:var(--agent-cmo)} .ag-coo{color:var(--agent-coo)}
+.ag-cfo{color:var(--agent-cfo)} .ag-general{color:var(--agent-general)}
+/* row actions on hover */
+.rowact{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:none;gap:4px;
+  background:linear-gradient(90deg,transparent,var(--surface-2) 18%);
+  padding-left:30px;
+}
+.trow:hover .rowact{display:flex}
+.rowact button{
+  font-family:var(--font-mono);font-size:11px;
+  background:var(--surface-3);color:var(--fg-1);
+  border:1px solid var(--line-strong);border-radius:var(--r-xs);
+  padding:2px 8px;
+}
+.rowact button:hover{border-color:var(--accent-line);color:var(--fg-0)}
+.rowact button.acc{color:var(--accent-hover);border-color:var(--accent-line)}
+.groupsep{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 8px 6px;
+  font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--fg-3);
+}
+.groupsep::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.groupsep .ct{color:var(--fg-2)}
+
+/* ---- keybind hint bar (lazygit) -------------------------------------- */
+.keybar{
+  position:sticky;bottom:0;z-index:5;
+  display:flex;flex-wrap:wrap;gap:0 18px;
+  padding:9px 16px;
+  border-top:1px solid var(--line);
+  background:linear-gradient(180deg,var(--surface-1),var(--surface-0));
+  font-size:11.5px;
+}
+.keybar .kb{white-space:nowrap}
+.keybar .kb b{color:var(--accent-hover);font-weight:600;margin-right:5px}
+.keybar .kb span{color:var(--fg-3)}
+.keybar .right{margin-left:auto;color:var(--fg-3)}
+
+/* ---- warp blocks (session) ------------------------------------------- */
+.scroll{flex:1;overflow:auto;padding:16px}
+.brief{
+  border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface-1);
+  margin-bottom:18px;
+}
+.brief .bh{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-bottom:1px solid var(--line-soft);
+  font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--fg-3);
+}
+.brief .bh::before{content:"▾";color:var(--accent)}
+.brief .bb{padding:12px 14px}
+.brief .sum{font-family:var(--font-body);color:var(--fg-1);font-size:13px;line-height:1.55;margin:0 0 12px}
+.brief ol{margin:0 0 12px;padding-left:0;list-style:none;counter-reset:p}
+.brief ol li{counter-increment:p;padding:3px 0 3px 28px;position:relative;color:var(--fg-1);font-size:12.5px}
+.brief ol li::before{content:counter(p,decimal-leading-zero);position:absolute;left:0;color:var(--fg-3)}
+.acc-rows{display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line-soft);padding-top:10px}
+.acc-row{display:flex;gap:10px;align-items:center;font-size:12.5px}
+.acc-row .g{width:14px;text-align:center}
+.acc-pass{color:var(--st-done)} .acc-fail{color:var(--st-blocked)} .acc-pend{color:var(--fg-3)}
+
+.block{
+  border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface-1);
+  margin-bottom:12px;
+  border-left:2px solid var(--line-strong);
+  overflow:hidden;
+}
+.block .bhead{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 12px;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--line-soft);
+  font-size:12px;
+}
+.block .bhead .t{margin-left:auto;color:var(--fg-3);font-size:11px}
+.block .body{padding:10px 14px;font-size:12.5px}
+.block.tool{border-left-color:var(--st-working)}
+.block.tool .bhead{color:var(--fg-1)}
+.block.tool .prompt{color:var(--st-working)}
+.block.tool .name{color:var(--fg-0);font-weight:600}
+.block.tool .arg{color:var(--fg-2)}
+.block.tool .result{color:var(--st-done)}
+.block.tool .result::before{content:"⮑ ";color:var(--fg-3)}
+.block.thinking{border-left-color:var(--st-planning);background:var(--surface-0)}
+.block.thinking .body{color:var(--fg-2);font-style:normal}
+.block.thinking .body::before{content:"// thinking — ";color:var(--st-planning)}
+.block.you{border-left-color:var(--accent)}
+.block.you .bhead .who{color:var(--accent-hover);font-weight:600}
+.block.assistant{border-left-color:var(--agent-cto)}
+.block.assistant .bhead .who{color:var(--agent-cto);font-weight:600}
+.block.you .body,.block.assistant .body{font-family:var(--font-body);line-height:1.55;color:var(--fg-1)}
+.who .dot{color:var(--fg-3);font-weight:400}
+
+.composer{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--line-strong);border-radius:var(--r-sm);
+  background:var(--surface-0);padding:9px 12px;margin-top:6px;
+}
+.composer .gt{color:var(--accent);font-weight:600}
+.composer input{flex:1;background:transparent;border:0;outline:0;color:var(--fg-0);font-family:var(--font-mono);font-size:13px}
+.composer input::placeholder{color:var(--fg-3)}
+
+/* ---- objective describe panel ---------------------------------------- */
+.describe{
+  border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface-1);
+  max-width:860px;
+}
+.describe .dh{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-bottom:1px solid var(--line);
+  background:var(--surface-2);
+  font-size:12px;
+}
+.describe .dh .ttl{color:var(--fg-0);font-weight:600}
+.describe .dh .glyph{font-size:15px}
+.describe .db{padding:14px 16px}
+.kvtable{display:grid;grid-template-columns:auto 1fr;gap:4px 22px;font-size:12.5px}
+.kvtable dt{color:var(--fg-3);text-transform:uppercase;font-size:10.5px;letter-spacing:.8px;align-self:center}
+.kvtable dd{margin:0;color:var(--fg-1);font-variant-numeric:tabular-nums}
+.kvtable dd .accent{color:var(--accent-hover)}
+.subblock{
+  margin-top:16px;border-top:1px solid var(--line-soft);padding-top:14px;
+}
+.subblock .lbl{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--fg-3);margin-bottom:8px}
+.subblock .desc{font-family:var(--font-body);color:var(--fg-1);line-height:1.6;font-size:13px}
+.dots{display:inline-flex;gap:7px;font-size:13px}
+.dot-pass{color:var(--st-done)} .dot-fail{color:var(--st-blocked)} .dot-pend{color:var(--fg-3)}
+.rollup{font-size:12.5px;color:var(--fg-2)}
+.rollup .bar{display:inline-block;width:120px;height:7px;border-radius:4px;background:var(--surface-3);vertical-align:middle;margin:0 8px;overflow:hidden;border:1px solid var(--line)}
+.rollup .bar i{display:block;height:100%;background:var(--accent)}
+.acthint{margin-top:16px;border-top:1px solid var(--line-soft);padding-top:12px;font-size:12px;color:var(--fg-3)}
+.acthint b{color:var(--accent-hover)}
+
+/* ---- mobile ---------------------------------------------------------- */
+.mtabbar{display:none}
+body[data-frame="mobile"] .tui{max-width:430px;border:none}
+body[data-frame="mobile"] .keybar{display:none}
+body[data-frame="mobile"] .ctx{padding:9px 13px;font-size:11px}
+body[data-frame="mobile"] .ctx .kv:nth-child(n+4){display:none}
+body[data-frame="mobile"] .ctx .spacer{flex-basis:100%;height:0}
+body[data-frame="mobile"] .ctx .summary{margin-top:6px;font-size:11px;gap:10px}
+body[data-frame="mobile"] .cmd input{font-size:13px}
+body[data-frame="mobile"] .ghosts{display:none}
+body[data-frame="mobile"] .chips{padding:10px 13px 8px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+body[data-frame="mobile"] .chip{flex:0 0 auto}
+
+/* mobile board -> card rows */
+body[data-frame="mobile"] .thead{display:none}
+body[data-frame="mobile"] .tablewrap{padding:0 0 76px}
+body[data-frame="mobile"] .groupsep{padding:14px 14px 6px}
+body[data-frame="mobile"] .trow{
+  display:flex;align-items:center;gap:11px;
+  height:auto;min-height:60px;
+  padding:11px 14px;
+  border-bottom:1px solid var(--line-soft);
+}
+body[data-frame="mobile"] .trow:hover{background:transparent}
+body[data-frame="mobile"] .trow .rowact{display:none}
+body[data-frame="mobile"] .m-stat{font-size:18px;flex:0 0 auto}
+body[data-frame="mobile"] .m-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+body[data-frame="mobile"] .m-title{color:var(--fg-0);font-size:13px;line-height:1.35;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body[data-frame="mobile"] .m-meta{display:flex;gap:10px;font-size:11px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+body[data-frame="mobile"] .m-meta .ag{font-weight:600}
+body[data-frame="mobile"] .m-chev{color:var(--fg-3);font-size:18px;flex:0 0 auto}
+/* desktop-only cells hidden on mobile */
+body[data-frame="mobile"] .trow .cell.deskonly,
+body[data-frame="mobile"] .trow .c-key{display:none}
+
+body[data-frame="mobile"] .mtabbar{
+  display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:var(--surface-1);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.mtabbar a{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:54px;padding:6px 0 8px;
+  color:var(--fg-3);font-size:10px;font-family:var(--font-mono);
+}
+.mtabbar a .ic{font-size:17px;line-height:1}
+.mtabbar a.on{color:var(--accent-hover)}
+body[data-frame="mobile"] .scroll{padding:14px 14px 80px}
+body[data-frame="mobile"] .describe{max-width:100%}
+body[data-frame="mobile"] .kvtable{grid-template-columns:auto 1fr;gap:4px 14px}
+
+/* desktop: hide mobile-only bits */
+body[data-frame="desktop"] .m-stat,
+body[data-frame="desktop"] .m-main,
+body[data-frame="desktop"] .m-chev{display:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="../data.js"></script>
+<script>
+(function(){
+  const OK = window.OK;
+  const qs = new URLSearchParams(location.search);
+  const screen = (qs.get("screen") || "board").toLowerCase();
+  const frame  = (qs.get("frame")  || "desktop").toLowerCase();
+  document.body.dataset.screen = screen;
+  document.body.dataset.frame  = frame;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  // status -> unicode glyph
+  const GLYPH = {
+    planning:"◇", queue:"○", working:"◐", ai:"▶", review:"◑", human:"●", done:"✓", blocked:"⚠"
+  };
+  // single-key row hint cycle
+  const ROW_KEYS = "abcdefghijklmnopqrstuvwxyz";
+
+  function agentName(k){ return (OK.AGENTS[k]||{}).name || k.toUpperCase(); }
+  function statusLabel(k){ return (OK.STATUS[k]||{}).label || k; }
+
+  /* ---------- shared: context strip ---------- */
+  function ctxStrip(extra){
+    const objs = OK.OBJECTIVES;
+    const live = objs.filter(o=>o.live).length;
+    const need = objs.filter(o=>o.status==="human").length;
+    const blk  = objs.filter(o=>o.status==="blocked").length;
+    const done = objs.filter(o=>o.status==="done").length;
+    return `
+    <div class="ctx">
+      <div class="brand"><span class="glyph">◣</span>OperationKit</div>
+      <div class="kv"><b>workspace:</b><span>mike-luka</span></div>
+      <div class="kv"><b>account:</b><span>mike</span></div>
+      <div class="kv"><b>live:</b><span class="live">${live}</span></div>
+      <div class="kv"><b>objectives:</b><span>${objs.length}</span></div>
+      <div class="spacer"></div>
+      <div class="summary">
+        <span class="need">▲ ${need} need you</span>
+        <span class="blk">⚠ ${blk} blocked</span>
+        <span class="done">✓ ${done} shipped</span>
+      </div>
+    </div>`;
+  }
+
+  function cmdBar(placeholder){
+    return `
+    <div class="cmdwrap">
+      <div class="cmd" onclick="this.querySelector('input').focus()">
+        <span class="colon">:</span>
+        <input type="text" spellcheck="false" placeholder="${placeholder||"objectives"}" aria-label="command">
+        <span class="caret"></span>
+      </div>
+      <div class="ghosts">
+        <code>:board</code><code>:sessions</code><code>:logs</code><code>:new</code><code>/filter</code>
+        <span class="dim3">— type a verb, hit ↵</span>
+      </div>
+    </div>`;
+  }
+
+  function keybar(keys){
+    const right = `<span class="right">tui · v2 · sorted: needs-you ▲</span>`;
+    return `<div class="keybar">${keys.map(([k,l])=>`<span class="kb"><b>${k}</b><span>${l}</span></span>`).join("")}${right}</div>`;
+  }
+
+  function mobileTabs(active){
+    const tabs = [
+      ["board","Board","▤"],["sessions","Sessions","❯"],["jarvis","Jarvis","◈"],["docs","Docs","▢"],["more","More","···"]
+    ];
+    return `<nav class="mtabbar">${tabs.map(([k,l,i])=>
+      `<a class="${k===active?"on":""}" href="#${k}"><span class="ic">${i}</span>${l}</a>`).join("")}</nav>`;
+  }
+
+  /* =========================================================== BOARD === */
+  function renderBoard(){
+    // category counts
+    const counts = {};
+    OK.CATEGORIES.forEach(c=>{
+      counts[c] = c==="All" ? OK.OBJECTIVES.length
+        : OK.OBJECTIVES.filter(o=>o.category===c).length;
+    });
+    const chips = OK.CATEGORIES.map((c,i)=>
+      `<span class="chip ${i===0?"on":""}">[${esc(c.toLowerCase())}] <span class="n">${counts[c]}</span></span>`
+    ).join("");
+
+    // sort: needs-you/blocked first, then working group, then queued, then done
+    const rank = {human:0, blocked:1, working:2, ai:3, review:4, planning:5, queue:6, done:7};
+    const sorted = [...OK.OBJECTIVES].sort((a,b)=> (rank[a.status]-rank[b.status]) || (Date.parse(b.updated)-Date.parse(a.updated)));
+
+    // grouping
+    const groups = [
+      {label:"Needs You", test:o=>o.status==="human"||o.status==="blocked"},
+      {label:"In Progress", test:o=>["working","ai","review","planning"].includes(o.status)},
+      {label:"Queued", test:o=>o.status==="queue"},
+      {label:"Shipped", test:o=>o.status==="done"},
+    ];
+
+    const head = `
+      <div class="thead">
+        <div></div>
+        <div>STATUS</div>
+        <div>OBJECTIVE</div>
+        <div>AGENT</div>
+        <div class="deskonly">BRANCH</div>
+        <div class="c-sess deskonly">SESS</div>
+        <div class="c-cost deskonly">COST</div>
+        <div class="c-age deskonly">AGE</div>
+        <div></div>
+      </div>`;
+
+    let keyIdx = 0;
+    function row(o){
+      const k = ROW_KEYS[keyIdx++ % 26];
+      const g = GLYPH[o.status];
+      const need = o.status==="human", blk = o.status==="blocked";
+      const branch = o.branch || "—";
+      const href = `?screen=objective&frame=${frame}`;
+      const sess = o.sessionCount || o.sessions || 0;
+      // desktop grid row + mobile card pieces (CSS swaps layout)
+      return `
+      <a class="trow ${need?"need":""} ${blk?"blocked":""}" href="${href}">
+        <div class="cell c-key">${k}</div>
+        <div class="cell c-status"><span class="glyph g-${o.status}" title="${statusLabel(o.status)}">${g}</span></div>
+        <div class="cell c-id deskonly">${esc(o.id)}</div>
+        <div class="cell c-obj deskonly">${esc(o.title)}</div>
+        <div class="cell c-agent ag-${o.agent} deskonly">${esc(agentName(o.agent))}</div>
+        <div class="cell c-branch deskonly">${esc(branch)}</div>
+        <div class="cell c-sess deskonly">${o.sessions}</div>
+        <div class="cell c-cost deskonly">${OK.fmtCost(o.cost)}</div>
+        <div class="cell c-age deskonly">${OK.fmtTime(o.updated)}</div>
+        <div></div>
+        <!-- mobile-only -->
+        <div class="m-stat glyph g-${o.status}">${g}</div>
+        <div class="m-main">
+          <div class="m-title">${esc(o.title)}</div>
+          <div class="m-meta">
+            <span>${esc(o.id)}</span>
+            <span class="ag ag-${o.agent}">${esc(agentName(o.agent))}</span>
+            <span>${esc(statusLabel(o.status))}</span>
+            <span>${OK.fmtCost(o.cost)}</span>
+          </div>
+        </div>
+        <div class="m-chev">›</div>
+        <div class="rowact" onclick="event.preventDefault();event.stopPropagation();">
+          <button>↵ open</button>
+          ${need?`<button class="acc">a approve</button><button>r rework</button>`
+                : blk?`<button class="acc">u unblock</button><button>l logs</button>`
+                : `<button>l logs</button>`}
+        </div>
+      </a>`;
+    }
+
+    let body = "";
+    groups.forEach(grp=>{
+      const items = sorted.filter(grp.test);
+      if(!items.length) return;
+      body += `<div class="groupsep">${grp.label} <span class="ct">· ${items.length}</span></div>`;
+      body += items.map(row).join("");
+    });
+
+    const kb = keybar([
+      ["↵","open"],["/","filter"],["l","logs"],["s","status"],
+      ["a","approve"],["r","rework"],["n","new"],["?","help"]
+    ]);
+
+    document.getElementById("root").innerHTML = `
+      <div class="tui">
+        ${ctxStrip()}
+        ${cmdBar("objectives")}
+        <div class="chips">${chips}</div>
+        <div class="tablewrap">
+          ${head}
+          ${body}
+        </div>
+        ${kb}
+        ${mobileTabs("board")}
+      </div>`;
+  }
+
+  /* ========================================================= SESSION === */
+  function renderSession(){
+    const s = OK.SESSION;
+    const g = GLYPH[s.status];
+    const brief = s.brief;
+    const accGlyph = a => a.pass===true ? `<span class="g acc-pass">✓</span>`
+      : a.pass===false ? `<span class="g acc-fail">✗</span>`
+      : `<span class="g acc-pend">○</span>`;
+
+    const briefHtml = `
+      <div class="brief">
+        <div class="bh">brief — ${esc(s.objectiveId)}</div>
+        <div class="bb">
+          <p class="sum">${esc(brief.summary)}</p>
+          <ol>${brief.plan.map(p=>`<li>${esc(p)}</li>`).join("")}</ol>
+          <div class="acc-rows">
+            ${brief.acceptance.map(a=>`<div class="acc-row">${accGlyph(a)}<span>${esc(a.label)}</span></div>`).join("")}
+          </div>
+        </div>
+      </div>`;
+
+    function msgBlock(m){
+      if(m.kind==="tool"){
+        return `
+        <div class="block tool">
+          <div class="bhead"><span class="prompt">$</span> <span class="name">${esc(m.name)}</span> <span class="arg">${esc(m.arg)}</span><span class="t">${esc(m.t)}</span></div>
+          <div class="body result">${esc(m.result)}</div>
+        </div>`;
+      }
+      if(m.kind==="thinking"){
+        return `
+        <div class="block thinking">
+          <div class="body">${esc(m.text)}</div>
+        </div>`;
+      }
+      const who = m.kind==="user" ? "you" : s.agent;
+      return `
+      <div class="block ${m.kind==="user"?"you":"assistant"}">
+        <div class="bhead"><span class="who">${esc(who)}<span class="dot">@${esc(s.workspace)}</span></span><span class="t">${esc(m.t)}</span></div>
+        <div class="body">${esc(m.text)}</div>
+      </div>`;
+    }
+
+    const sessCtx = `
+      <div class="ctx">
+        <div class="brand"><span class="glyph">◣</span>session</div>
+        <div class="kv"><b>id:</b><span>${esc(s.objectiveId)}</span></div>
+        <div class="kv"><b>agent:</b><span class="ag-${s.agent}">${esc(agentName(s.agent))}</span></div>
+        <div class="kv"><b>status:</b><span class="g-${s.status}">${g} ${esc(statusLabel(s.status))}</span></div>
+        <div class="kv"><b>branch:</b><span>${esc(s.branch)}</span></div>
+        <div class="spacer"></div>
+        <div class="summary">
+          <span class="dim">${esc(s.sessionId)} · #${s.sessionCount}</span>
+          <span class="done">${OK.fmtCost(s.cost)}</span>
+        </div>
+      </div>`;
+
+    document.getElementById("root").innerHTML = `
+      <div class="tui">
+        ${sessCtx}
+        <div class="scroll">
+          ${briefHtml}
+          ${s.messages.map(msgBlock).join("")}
+          <div class="composer" onclick="this.querySelector('input').focus()">
+            <span class="gt">&gt;</span>
+            <input type="text" spellcheck="false" placeholder="follow-up… _" aria-label="follow-up">
+            <span class="caret"></span>
+          </div>
+        </div>
+        ${keybar([["⏎","send"],["^c","stop"],["k","scroll"],["/","find"],["b","back"]])}
+        ${mobileTabs("sessions")}
+      </div>`;
+  }
+
+  /* ======================================================= OBJECTIVE === */
+  function renderObjective(){
+    const o = OK.DETAIL;
+    const g = GLYPH[o.status];
+    const dots = o.review.map(r=>
+      r===true ? `<span class="dot-pass">●</span>`
+      : r===false ? `<span class="dot-fail">●</span>`
+      : `<span class="dot-pend">○</span>`
+    ).join("");
+    const pct = o.workers.total ? Math.round(o.workers.done/o.workers.total*100) : 0;
+    const pr = o.pr ? `#${o.pr}` : "—";
+    const branch = o.branch || "—";
+
+    const kv = [
+      ["status", `<span class="g-${o.status}">${g} ${esc(statusLabel(o.status))}</span>`],
+      ["id", esc(o.id)],
+      ["agent", `<span class="ag-${o.agent}">${esc(agentName(o.agent))}</span>`],
+      ["workspace", esc(o.workspace)],
+      ["category", esc(o.category)],
+      ["type", esc(o.type)],
+      ["model", esc(o.model)],
+      ["branch", esc(branch)],
+      ["pr", pr],
+      ["live", o.live ? `<span class="accent">● yes</span>` : "no"],
+      ["sessions", String(o.sessions)],
+      ["cost", OK.fmtCost(o.cost)],
+      ["updated", `${OK.fmtTime(o.updated)} <span class="dim3">(${esc(o.updated)})</span>`],
+    ];
+
+    document.getElementById("root").innerHTML = `
+      <div class="tui">
+        ${ctxStrip()}
+        <div class="scroll">
+          <div class="describe">
+            <div class="dh">
+              <span class="glyph g-${o.status}">${g}</span>
+              <span class="ttl">describe ${esc(o.id)}</span>
+              <span class="dim" style="margin-left:auto">${esc(statusLabel(o.status))}</span>
+            </div>
+            <div class="db">
+              <dl class="kvtable">
+                ${kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}
+              </dl>
+
+              <div class="subblock">
+                <div class="lbl">objective</div>
+                <div class="desc" style="font-family:var(--font-mono);font-size:13px;color:var(--fg-0)">${esc(o.title)}</div>
+                <div class="desc" style="margin-top:8px">${esc(o.desc)}</div>
+              </div>
+
+              <div class="subblock">
+                <div class="lbl">ai review</div>
+                <div class="dots">${dots}</div>
+              </div>
+
+              <div class="subblock">
+                <div class="lbl">workers</div>
+                <div class="rollup">${o.workers.done}/${o.workers.total} complete
+                  <span class="bar"><i style="width:${pct}%"></i></span> ${pct}%</div>
+              </div>
+
+              <div class="acthint">actions &nbsp; <b>a</b> approve &nbsp; <b>r</b> rework &nbsp; <b>l</b> logs &nbsp; <b>p</b> open pr &nbsp; <b>esc</b> back</div>
+            </div>
+          </div>
+        </div>
+        ${keybar([["a","approve"],["r","rework"],["l","logs"],["p","pr"],["esc","back"]])}
+        ${mobileTabs("board")}
+      </div>`;
+  }
+
+  /* ---------- dispatch ---------- */
+  try {
+    if(screen==="session") renderSession();
+    else if(screen==="objective") renderObjective();
+    else renderBoard();
+  } catch(e){
+    document.getElementById("root").innerHTML =
+      `<div class="tui"><div class="scroll"><div class="block"><div class="body">render error: ${esc(e.message)}</div></div></div></div>`;
+  }
+})();
+</script>
+</body>
+</html>
