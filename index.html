@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OperationKit — Mission control for a self-hosted agent fleet</title>
+  <meta name="description" content="Self-hosted mission control for a fleet of autonomous coding agents. Run 25+ governed Claude Code sessions across multi-tenant workspaces — RBAC, personas, and an adversarial review gate — entirely on your own infrastructure. Apache-2.0." />
+  <meta name="theme-color" content="#0B0E14" />
+
+  <!-- SVG favicon (logomark); modern browsers render it directly -->
+  <link rel="icon" type="image/svg+xml" href="logomark.svg" />
+  <link rel="apple-touch-icon" href="logomark.svg" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="OperationKit — Mission control for a self-hosted agent fleet" />
+  <meta property="og:description" content="Self-hosted mission control for a fleet of autonomous coding agents. 25+ governed Claude Code sessions on infra you own. Apache-2.0." />
+  <meta property="og:url" content="https://operationkit.ai" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preload" as="font" type="font/woff2" href="fonts/space-grotesk-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="#top" aria-label="OperationKit home">
+        <img src="wordmark.svg" alt="OperationKit" width="430" height="96" />
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="#why">Why self-host</a>
+        <a class="navlink" href="#fleet">Fleet</a>
+        <a class="navlink" href="#quickstart">Quickstart</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="beacon" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <i class="beacon-dot"></i>
+      </div>
+      <div class="wrap hero-inner">
+        <div class="status-pill">
+          <i class="live-dot"></i> 25+ agents · one host · your infra
+        </div>
+        <h1>Mission control for a <span class="accent">self-hosted</span> agent fleet.</h1>
+        <p class="hero-oneliner">
+          Self-hosted mission control for a fleet of autonomous coding agents — spin up on
+          your own $6 VPS in minutes, run 25+ governed Claude Code sessions from your phone,
+          and keep every line of code and credential on your own infrastructure.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            View on GitHub
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/m1keluka/OperationKit/blob/main/docs/SELF-HOSTING.md" rel="noopener">
+            Read the self-hosting guide
+          </a>
+        </div>
+        <div class="hero-chips" aria-hidden="false">
+          <span class="chip"><i class="cdot"></i> <b>self-hosted</b></span>
+          <span class="chip"><i class="cdot"></i> <b>multi-tenant</b> workspaces</span>
+          <span class="chip"><i class="cdot"></i> RBAC + <b>personas</b></span>
+          <span class="chip"><i class="cdot"></i> adversarial <b>review gate</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HONEST PRE-RELEASE NOTE ============ -->
+    <section class="section" style="padding-top: 0;">
+      <div class="wrap">
+        <div class="callout reveal" role="note">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+          </svg>
+          <div>
+            <h3>An honest pre-release note — read this first.</h3>
+            <p>
+              The core runs up to ~25 agents executing shell on a single shared host. That is a real
+              blast radius, and we say so plainly. Current isolation is <span class="mono">per-session git worktrees</span>
+              plus a <span class="mono">pre-write guard hook</span> — enough to stop the common cross-session footgun,
+              not a security sandbox.
+            </p>
+            <p>
+              Per-agent container/sandbox isolation is on the roadmap, not shipped. Until then, run OperationKit
+              on a dedicated, disposable VPS with only the credentials it needs. We document the sharp edges
+              instead of hiding them — that honesty is part of the brand.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DIFFERENTIATORS (LOCKED ORDER) ============ -->
+    <section class="section" id="fleet" style="padding-top: 8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">A fleet, not a tab</p>
+          <h2>Built to govern many agents at once — not babysit one.</h2>
+          <p class="lead">
+            Most tools manage one agent, on one machine, for one person. OperationKit is the control
+            plane for a whole fleet. Four things make that real, in this order.
+          </p>
+        </div>
+
+        <div class="diffs">
+          <!-- 1 self-hosted -->
+          <article class="diff reveal">
+            <div class="diff-num">01</div>
+            <div>
+              <h3>Self-hosted by design — your infra, your cost, your data.</h3>
+              <p>
+                OperationKit runs entirely on a server you control: a <span class="hl">$6 VPS</span>, your own
+                Anthropic billing, your own data-residency posture. Nothing routes through a third-party
+                orchestration cloud. This is the one thing a vendor cloud structurally cannot offer — so it leads.
+              </p>
+            </div>
+          </article>
+          <!-- 2 multi-tenant -->
+          <article class="diff reveal">
+            <div class="diff-num">02</div>
+            <div>
+              <h3>A fleet, not a tab — multi-tenant workspaces.</h3>
+              <p>
+                Built for <span class="hl">25+ concurrent sessions</span> organized into multi-tenant
+                <span class="hl">workspaces</span> — separate teams or clients on one install, each with its own
+                objectives and members, without crossing the streams.
+              </p>
+            </div>
+          </article>
+          <!-- 3 RBAC / personas -->
+          <article class="diff reveal">
+            <div class="diff-num">03</div>
+            <div>
+              <h3>Governance is built in, not bolted on.</h3>
+              <p>
+                Role-based access control and per-workspace <span class="hl">personas</span> mean the right people
+                get the right agents with the right context. It's the layer teams and agencies actually pay
+                attention to — and the layer single-user tools skip.
+              </p>
+            </div>
+          </article>
+          <!-- 4 review gate -->
+          <article class="diff reveal">
+            <div class="diff-num">04</div>
+            <div>
+              <h3>An adversarial review gate, not just a diff.</h3>
+              <p>
+                Work produced by an agent can be routed through an automated <span class="hl">adversarial review</span>
+                before it's accepted. Most tools stop at "show the human a diff"; OperationKit treats review as a
+                governed stage of the workflow. The board of objectives is one feature inside that control plane —
+                not the product.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OBJECTION HANDLER ============ -->
+    <section class="section" id="why" style="padding-top: 8px;">
+      <div class="wrap">
+        <div class="objection reveal">
+          <h2>Why not just use a hosted Claude Code product?</h2>
+          <p class="intro">
+            Hosted Claude Code is excellent — <b>use it if it fits.</b> OperationKit exists for what a vendor
+            cloud structurally can't serve:
+          </p>
+          <div class="obj-list">
+            <div class="obj-item">
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <p><b>Your code and credentials never leave your infrastructure.</b> Everything runs on a host you control. Nothing is sent to a third-party orchestration cloud.</p>
+            </div>
+            <div class="obj-item">
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <p><b>Multi-tenant governance.</b> Workspaces, RBAC, per-workspace personas, and a review gate — built for a team or agency running many projects, not a single user.</p>
+            </div>
+            <div class="obj-item">
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <p><b>Your infra, your cost, your rules.</b> One cheap VPS, your own billing, your own data-residency and compliance posture.</p>
+            </div>
+          </div>
+          <p class="closer">
+            If you're a solo dev happy on a vendor cloud, the hosted product is probably the better choice.
+            OperationKit is for keeping the whole operation in-house.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUICKSTART ============ -->
+    <section class="section" id="quickstart" style="padding-top: 8px;">
+      <div class="wrap">
+        <div class="quickstart-grid">
+          <div class="reveal">
+            <p class="eyebrow">From zero to fleet</p>
+            <h2 style="font-size: clamp(1.7rem,3.4vw,2.2rem); margin-bottom: 14px;">Stand it up on a $6 VPS in minutes.</h2>
+            <p class="lead" style="margin-bottom: 8px;">
+              One host, one compose file, then drive the board from your laptop or your phone. The snippet is
+              illustrative — the real steps live in the self-hosting guide.
+            </p>
+            <div class="steps">
+              <div class="step">
+                <div class="step-n">1</div>
+                <div>
+                  <h3>Bring a host.</h3>
+                  <p>Any disposable VPS — a $6/mo box is enough to start. Add your own Anthropic API key or org seats.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">2</div>
+                <div>
+                  <h3>Compose up.</h3>
+                  <p>Clone, set env, <span class="mono">docker compose up</span>. The web app and the agent runtime come up together.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-n">3</div>
+                <div>
+                  <h3>Open the board — anywhere.</h3>
+                  <p>Create a workspace, spawn objectives, watch each live session in an embedded terminal from your phone.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="terminal reveal" role="img" aria-label="Example terminal session standing up OperationKit with docker compose">
+            <div class="term-bar">
+              <i class="tdot"></i><i class="tdot"></i><i class="tdot"></i>
+              <span class="tname">ssh root@your-vps · ~/operationkit</span>
+            </div>
+            <div class="term-body">
+<span class="ln"><span class="cm"># on your own $6 VPS — nothing leaves this host</span></span>
+<span class="ln"><span class="pr">$</span> <span class="cmd">git clone https://github.com/m1keluka/OperationKit.git</span></span>
+<span class="ln"><span class="pr">$</span> <span class="cmd">cd OperationKit && cp .env.example .env</span></span>
+<span class="ln"><span class="cm"># add your own ANTHROPIC_API_KEY in .env, then:</span></span>
+<span class="ln"><span class="pr">$</span> <span class="cmd">docker compose up <span class="arg">-d</span></span></span>
+<span class="ln"> </span>
+<span class="ln"><span class="ok">✓</span> web        ready  <span class="cm">→ http://localhost:3000</span></span>
+<span class="ln"><span class="ok">✓</span> runtime    ready  <span class="cm">fleet: 0/25 sessions</span></span>
+<span class="ln"><span class="ok">✓</span> review     armed  <span class="cm">adversarial gate enabled</span></span>
+<span class="ln"> </span>
+<span class="ln"><span class="cm"># open the board from your laptop or your phone.</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OPEN CORE (one light sentence) ============ -->
+    <section class="section opencore">
+      <div class="wrap reveal">
+        <span class="badge">Apache-2.0</span>
+        <p>The core is <b>genuinely free and open under Apache-2.0</b>, and it stays that way.</p>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="section finalcta">
+      <div class="wrap reveal">
+        <p class="eyebrow" style="display:inline-block;">Keep the operation in-house</p>
+        <h2>Run a governed agent fleet on infrastructure you own.</h2>
+        <p>Read the code, clone it onto a disposable VPS, and see the whole fleet on one board.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            View on GitHub
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/m1keluka/OperationKit/blob/main/docs/SELF-HOSTING.md" rel="noopener">
+            Read the self-hosting guide
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <img src="wordmark.svg" alt="OperationKit" width="430" height="96" />
+          <p>Self-hosted mission control for a fleet of autonomous coding agents.</p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h4>Project</h4>
+            <a href="https://github.com/m1keluka/OperationKit" rel="noopener">GitHub repo</a>
+            <a href="https://github.com/m1keluka/OperationKit/blob/main/docs/SELF-HOSTING.md" rel="noopener">Self-hosting guide</a>
+            <a href="https://github.com/m1keluka/OperationKit/blob/main/LICENSE" rel="noopener">License</a>
+          </div>
+          <div class="footer-col">
+            <h4>Site</h4>
+            <a href="#why">Why self-host</a>
+            <a href="#fleet">The fleet</a>
+            <a href="#quickstart">Quickstart</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-meta">
+        <span class="lic">
+          <a class="lic-badge" href="https://github.com/m1keluka/OperationKit/blob/main/LICENSE" rel="noopener" aria-label="License: Apache-2.0">
+            <span class="lic-k">license</span><span class="lic-v">Apache-2.0</span>
+          </a>
+          <span class="prov">Previously run internally under the working codename "Command Center." The codename is retired; the product is OperationKit.</span>
+        </span>
+        <span class="footer-domains">
+          <a href="https://operationkit.ai" rel="noopener">operationkit.ai</a> · <a href="https://operationkit.com" rel="noopener">operationkit.com</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll-reveal, guarded by prefers-reduced-motion. No external deps.
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var els = document.querySelectorAll('.reveal');
+      if (reduce || !('IntersectionObserver' in window)) {
+        els.forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      els.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>
