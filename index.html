@@ -3,23 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OperationKit: an operating system you own, powered by agents</title>
-  <meta name="description" content="An agent-powered operating system for your work. Self-hosted, model-agnostic, and portable: build or bring any agent, run on any model, and take your knowledge anywhere. Apache-2.0." />
+  <title>OperationKit: Own your operating system</title>
+  <meta name="description" content="An operating system you own, powered by agents. Self-hosted, runs on any AI model, and your knowledge comes with you. Open source under Apache-2.0." />
   <meta name="theme-color" content="#0c0f14" />
 
   <!-- no-flash theme init: default dark; honor a stored 'light' preference before first paint -->
   <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 
-  <!-- SVG favicon (caret mark); modern browsers render it directly -->
+  <!-- Favicons: SVG for modern browsers, PNG fallbacks, PNG apple-touch for iOS / iMessage link previews -->
   <link rel="icon" type="image/svg+xml" href="favicon-caret.svg" />
-  <link rel="apple-touch-icon" href="favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph / link unfurl (text messages, social) -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="OperationKit: an operating system you own, powered by agents" />
-  <meta property="og:description" content="An agent-powered operating system for your work. Self-hosted and model-agnostic. Build or bring any agent, run on any model, and take your knowledge anywhere." />
+  <meta property="og:site_name" content="OperationKit" />
+  <meta property="og:title" content="OperationKit: Own your operating system" />
+  <meta property="og:description" content="An operating system you own, powered by agents. Self-hosted, runs on any AI model, and your knowledge comes with you." />
   <meta property="og:url" content="https://operationkit.com" />
+  <meta property="og:image" content="https://m1keluka.github.io/operationkit-site/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="OperationKit. Own your operating system. Agent-powered, self-hosted, runs on any AI model." />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="OperationKit: Own your operating system" />
+  <meta name="twitter:description" content="An operating system you own, powered by agents. Self-hosted, runs on any AI model, and your knowledge comes with you." />
+  <meta name="twitter:image" content="https://m1keluka.github.io/operationkit-site/og-image.png" />
 
   <link rel="preload" as="font" type="font/woff2" href="fonts/geist-sans-700.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="fonts/geist-mono-500.woff2" crossorigin />
