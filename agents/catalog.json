@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "catalog": "operationkit-agents",
+  "description": "Free, first-party agent catalog for OperationKit. Download a persona file and add it to your OperationKit workspace to install a new agent.",
+  "version": "1.0.0",
+  "agents": [
+    {
+      "id": "cto",
+      "name": "Chief Technology Officer",
+      "role": "CTO",
+      "description": "Owns the full technical lifecycle — evaluating ideas, writing PRDs, decomposing work, orchestrating developer sub-agents, and shipping verified code with rigorous QA.",
+      "version": "1.0.0",
+      "tags": ["engineering", "product", "technical-leadership", "prd", "code-review"],
+      "file": "agents/cto.md"
+    },
+    {
+      "id": "cmo",
+      "name": "Chief Marketing Officer",
+      "role": "CMO",
+      "description": "Owns brand positioning, marketing strategy, SEO/GEO content, campaigns, and go-to-market materials — from pitch decks and landing pages to content calendars and email sends.",
+      "version": "1.0.0",
+      "tags": ["marketing", "brand", "content", "seo", "campaigns", "gtm"],
+      "file": "agents/cmo.md"
+    },
+    {
+      "id": "coo",
+      "name": "Chief Operating Officer",
+      "role": "COO",
+      "description": "Owns operations strategy, systems architecture, platform integration, tool evaluation, and process design — turning fuzzy workflows into documented, diagrammed, executable systems.",
+      "version": "1.0.0",
+      "tags": ["operations", "systems", "process", "integration", "diagrams"],
+      "file": "agents/coo.md"
+    },
+    {
+      "id": "cfo",
+      "name": "Chief Financial Officer",
+      "role": "CFO",
+      "description": "Owns financial visibility and discipline — cash position, runway, P&L, bookkeeping, and forecasting — translating raw financial data into clear decisions and projections.",
+      "version": "1.0.0",
+      "tags": ["finance", "accounting", "forecasting", "runway", "bookkeeping"],
+      "file": "agents/cfo.md"
+    },
+    {
+      "id": "designer",
+      "name": "Product Designer",
+      "role": "Designer",
+      "description": "Owns UI/UX and visual identity — design systems, component design, typography/color/layout decisions, accessibility audits, and design reviews that make products look and feel right.",
+      "version": "1.0.0",
+      "tags": ["design", "ui", "ux", "design-systems", "accessibility", "visual-identity"],
+      "file": "agents/designer.md"
+    },
+    {
+      "id": "hr",
+      "name": "Head of People",
+      "role": "HR",
+      "description": "Owns hiring and people ops — job postings, sourcing, interview guides, structured candidate scoring, and onboarding — building a repeatable, fair recruiting pipeline.",
+      "version": "1.0.0",
+      "tags": ["hr", "recruiting", "hiring", "interviews", "onboarding", "people-ops"],
+      "file": "agents/hr.md"
+    },
+    {
+      "id": "general-counsel",
+      "name": "General Counsel",
+      "role": "Legal",
+      "description": "Owns legal drafting and review — contracts, agreements, and compliance — flagging risk and producing clean first drafts. Not a substitute for a licensed attorney.",
+      "version": "1.0.0",
+      "tags": ["legal", "contracts", "compliance", "drafting", "risk"],
+      "file": "agents/general-counsel.md"
+    },
+    {
+      "id": "chief-of-staff",
+      "name": "Chief of Staff",
+      "role": "Chief of Staff / Executive Assistant",
+      "description": "The operator's right hand — prioritization and reviews, inbox triage and email drafting, strategic pushback and brainstorming, and memo/decision-doc drafting to keep the principal focused and moving.",
+      "version": "1.0.0",
+      "tags": ["executive-assistant", "chief-of-staff", "email", "prioritization", "planning", "research"],
+      "file": "agents/chief-of-staff.md"
+    }
+  ]
+}
