@@ -494,7 +494,7 @@
                 <div class="step-n">2</div>
                 <div>
                   <h3>Compose up.</h3>
-                  <p>Clone, set env, <span class="mono">docker compose up</span>. The web app and the agent runtime come up together.</p>
+                  <p>Copy <span class="mono">.env.example</span>, fill your keys, then <span class="mono">docker compose up</span>. The web app and the agent runtime come up together.</p>
                 </div>
               </div>
               <div class="step">
@@ -514,7 +514,7 @@
             </div>
             <div class="term-body">
 <span class="ln"><span class="cm"># on a server you control. nothing leaves this host</span></span>
-<span class="ln"><span class="pr">$</span> <span class="cmd">git clone https://github.com/m1keluka/OperationKit.git</span></span>
+<span class="ln"><span class="cm"># (source available when early access opens)</span></span>
 <span class="ln"><span class="pr">$</span> <span class="cmd">cd OperationKit && cp .env.example .env</span></span>
 <span class="ln"><span class="cm"># add your own model keys in .env, then:</span></span>
 <span class="ln"><span class="pr">$</span> <span class="cmd">docker compose up <span class="arg">-d</span></span></span>
