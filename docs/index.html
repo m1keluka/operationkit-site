@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Setup guide — OperationKit</title>
+  <meta name="description" content="Get from an empty Ubuntu 24.04 server to a running OperationKit board. Covers Docker, .env, first login, and connecting your Claude subscription." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    /* ── docs-specific layout ─────────────────────────────────── */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+    .step-row{display:flex;gap:16px;align-items:flex-start;margin-bottom:22px}
+    .step-n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--font-mono);font-weight:600;font-size:.88rem;display:grid;place-items:center;margin-top:2px}
+    .step-body h3{margin:0 0 4px;font-size:1.05rem}
+    .step-body p{margin:0;font-size:.97rem}
+    .prereq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 18px}
+    .prereq-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px}
+    .prereq-card .label{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .prereq-card .val{color:var(--ink);font-weight:600;font-size:.97rem}
+    .prereq-card .sub{font-size:.85rem;color:var(--text);margin-top:2px}
+    .tag-opt{font-family:var(--font-mono);font-size:.74rem;font-weight:500;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--muted);white-space:nowrap}
+    .tag-req{font-family:var(--font-mono);font-size:.74rem;font-weight:500;background:var(--accent-tint);border:1px solid var(--accent-line);border-radius:4px;padding:1px 6px;color:var(--accent);white-space:nowrap}
+    .back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:.82rem;color:var(--muted);margin-bottom:24px;text-decoration:none}
+    .back-link:hover{color:var(--accent)}
+    .back-link svg{width:14px;height:14px}
+    @media(max-width:600px){.prereq-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+  <!-- NAV (reuses landing styles) -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="/" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="/#board">Board</a>
+        <a class="navlink" href="/#agents">Agents</a>
+        <a class="navlink" href="/#quickstart">Quickstart</a>
+        <a class="navlink" href="/docs/" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- SIDEBAR NAV -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#prerequisites">Prerequisites</a></li>
+          <li><a href="#clone">Get the source</a></li>
+          <li><a href="#env">Configure .env</a></li>
+          <li><a href="#start">Start the stack</a></li>
+          <li><a href="#claude-auth">Authenticate Claude</a></li>
+          <li><a href="#health">Health check</a></li>
+          <li><a href="#seed">First user</a></li>
+          <li><a href="#login">Log in</a></li>
+          <li><a href="#first-objective">First objective</a></li>
+          <li><div class="nav-label">Going further</div></li>
+          <li><a href="#tls">TLS with Caddy</a></li>
+          <li><a href="#models">Model keys</a></li>
+          <li><a href="#teams">Teams and workspaces</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      </nav>
+
+      <!-- MAIN CONTENT -->
+      <article class="docs-content">
+
+        <a class="back-link" href="/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to operationkit
+        </a>
+
+        <p class="eyebrow">Setup guide</p>
+        <h1 id="overview">From zero to a running board</h1>
+        <p>
+          This guide walks a competent developer from an empty Ubuntu 24.04 server to a logged-in
+          OperationKit board. The steps match the current source tree (V1, reseeded 2026-08-28).
+        </p>
+        <p>
+          <strong>Early access:</strong> OperationKit V1 is in private early access. The source is
+          being prepared for a public release. If you have access to the source tree, these docs describe
+          exactly what <code>install.sh</code>, <code>docker-compose.yml</code>, and <code>.env.example</code>
+          contain today. Nothing here is invented or forward-looking.
+        </p>
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>
+            <strong>Two setup paths.</strong> The <strong>DigitalOcean installer</strong>
+            (<code>install.sh</code>) provisions Docker, Caddy, and all secrets for you on a fresh
+            droplet. <strong>Manual</strong> is any Linux host where you run the steps yourself.
+            The manual path is described below.
+          </p>
+        </div>
+
+        <!-- PREREQUISITES -->
+        <h2 id="prerequisites">Prerequisites</h2>
+        <div class="prereq-grid">
+          <div class="prereq-card">
+            <div class="label">Host</div>
+            <div class="val">Ubuntu 24.04</div>
+            <div class="sub">Any modern Linux with Docker works; Ubuntu 24.04 is the tested target.</div>
+          </div>
+          <div class="prereq-card">
+            <div class="label">Docker</div>
+            <div class="val">Engine + Compose v2</div>
+            <div class="sub"><code>docker compose version</code> must work. Install from Docker's official repo.</div>
+          </div>
+          <div class="prereq-card">
+            <div class="label">Resources</div>
+            <div class="val">4 GB RAM, 2 vCPU</div>
+            <div class="sub">Baseline for three containers. More headroom for heavy concurrent sessions.</div>
+          </div>
+          <div class="prereq-card">
+            <div class="label">Claude subscription</div>
+            <div class="val">Pro or Max</div>
+            <div class="sub">How agent sessions are powered. Not an API key; an OAuth-authenticated subscription. Required.</div>
+          </div>
+          <div class="prereq-card">
+            <div class="label">Domain + DNS</div>
+            <div class="val">Optional (for TLS)</div>
+            <div class="sub">Only needed for a public HTTPS deployment. Local runs work on 127.0.0.1.</div>
+          </div>
+        </div>
+
+        <p>
+          <strong>Model keys are optional.</strong> <code>ANTHROPIC_API_KEY</code> powers a small
+          server-side summarizer, not agent sessions. Agent sessions run under your Claude Code
+          subscription (authenticated separately). OpenAI and Gemini keys are also optional and off by
+          default.
+        </p>
+
+        <!-- GET THE SOURCE -->
+        <h2 id="clone">Get the source</h2>
+        <p>
+          When you have access to the source tree, clone it to your server:
+        </p>
+        <pre><code># On your server (not your laptop)
+git clone https://github.com/your-org/OperationKit.git
+cd OperationKit</code></pre>
+        <div class="note warn">
+          <svg class="note-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <p>
+            <strong>OperationKit-dev is currently private.</strong> The public release is
+            forthcoming. Join the waitlist on
+            <a href="https://github.com/m1keluka/OperationKit" rel="noopener">github.com/m1keluka/OperationKit</a>
+            to be notified when the source goes public.
+          </p>
+        </div>
+
+        <!-- CONFIGURE .ENV -->
+        <h2 id="env">Configure .env</h2>
+        <pre><code>cp .env.example .env</code></pre>
+        <p>
+          The <code>.env.example</code> documents every variable. The seven you must fill before
+          the stack will start:
+        </p>
+        <table>
+          <thead><tr><th>Variable</th><th>What it is</th><th>Required?</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>CC_JWT_SECRET</td>
+              <td>Signs session cookies. Rotating this logs everyone out.</td>
+              <td><span class="tag-req">required</span></td>
+            </tr>
+            <tr>
+              <td>LITELLM_MASTER_KEY</td>
+              <td>Auth key for the LiteLLM proxy. Use <code>sk-</code> prefix by convention.</td>
+              <td><span class="tag-req">required</span></td>
+            </tr>
+            <tr>
+              <td>LITELLM_SALT_KEY</td>
+              <td>Encryption salt for LiteLLM credential storage.</td>
+              <td><span class="tag-req">required</span></td>
+            </tr>
+            <tr>
+              <td>POSTGRES_PASSWORD</td>
+              <td>Password for the LiteLLM Postgres database (internal only, loopback).</td>
+              <td><span class="tag-req">required</span></td>
+            </tr>
+            <tr>
+              <td>ANTHROPIC_API_KEY</td>
+              <td>Powers the server-side session summarizer only. Agent sessions do not use this key.</td>
+              <td><span class="tag-opt">optional</span></td>
+            </tr>
+            <tr>
+              <td>OPENAI_API_KEY</td>
+              <td>OpenAI models via LiteLLM. Leave blank to skip.</td>
+              <td><span class="tag-opt">optional</span></td>
+            </tr>
+            <tr>
+              <td>GEMINI_API_KEY</td>
+              <td>Google Gemini models via LiteLLM. Leave blank to skip.</td>
+              <td><span class="tag-opt">optional</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Generate the secrets you invent yourself with:</p>
+        <pre><code>openssl rand -hex 32      # for CC_JWT_SECRET, LITELLM_SALT_KEY, POSTGRES_PASSWORD
+openssl rand -hex 24      # then prepend sk- for LITELLM_MASTER_KEY</code></pre>
+        <div class="note warn">
+          <svg class="note-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <p><strong>Never commit <code>.env</code>.</strong> It is git-ignored and contains live keys.</p>
+        </div>
+
+        <!-- START THE STACK -->
+        <h2 id="start">Start the stack</h2>
+        <pre><code>docker compose up -d</code></pre>
+        <p>
+          Compose starts three services: <code>litellm-db</code> (Postgres) first, then
+          <code>litellm</code> (model proxy on port 4000), then <code>command-center</code>
+          (the app on port 3002). The first run pulls images and builds the app container,
+          so give it a few minutes.
+        </p>
+        <pre><code># Watch the logs as it comes up:
+docker compose ps
+docker compose logs -f command-center</code></pre>
+
+        <!-- AUTHENTICATE CLAUDE -->
+        <h2 id="claude-auth">Authenticate your Claude subscription</h2>
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>
+            <strong>This step is required before any objective can run.</strong> Agent sessions are
+            powered by a Claude Pro or Max subscription, not by an API key. The subscription
+            authenticates via OAuth into an account slot on the host.
+          </p>
+        </div>
+        <p>
+          Once the stack is up, authenticate at least one Claude Code account using the helper:
+        </p>
+        <pre><code># Interactive (prompts you to authorize in a browser):
+./scripts/claude-auth.sh a
+
+# Headless / server-only path:
+./scripts/claude-auth.sh a --setup-token</code></pre>
+        <p>
+          The installer supports up to five account slots (<code>a</code> through <code>e</code>) plus a
+          Codex slot. Add more subscriptions later to increase concurrent session throughput.
+          Full details are in <code>docs/CLAUDE-CODE-AUTH.md</code> in the source tree.
+        </p>
+
+        <!-- HEALTH CHECK -->
+        <h2 id="health">Health check</h2>
+        <p>Both services expose health endpoints. Check them before moving on:</p>
+        <pre><code># Command Center app (should return HTTP 200 with {"status":"ok"}):
+curl -f http://127.0.0.1:3002/api/health
+
+# LiteLLM model proxy (loopback only — never exposed to the internet):
+curl -f http://127.0.0.1:4000/health/liveliness</code></pre>
+        <p>
+          If <code>command-center</code> is not healthy, check
+          <code>docker compose logs command-center</code>. The most common first-run causes are a
+          missing or blank required variable in <code>.env</code> or a bind-mount path that does not
+          exist on your host.
+        </p>
+
+        <!-- SEED FIRST USER -->
+        <h2 id="seed">Seed the first user</h2>
+        <p>The app ships with no users. Run the seed script once:</p>
+        <pre><code>docker compose exec command-center npm run seed</code></pre>
+        <p>
+          This creates an <strong>admin</strong> user with the initial password <code>changeme</code>
+          and a sample member user <code>ava</code>. The script prints
+          <code>Change passwords after first login!</code> Do that immediately.
+        </p>
+
+        <!-- LOG IN -->
+        <h2 id="login">Log in</h2>
+        <p>Open your browser and navigate to:</p>
+        <pre><code>http://127.0.0.1:3002</code></pre>
+        <p>
+          Log in with username <code>admin</code> and password <code>changeme</code>. Change the
+          password from the account settings UI before doing anything else.
+        </p>
+        <p>
+          Login issues a JWT signed with <code>CC_JWT_SECRET</code>. If you rotate that secret
+          later, all sessions are invalidated and everyone must log in again.
+        </p>
+
+        <!-- FIRST OBJECTIVE -->
+        <h2 id="first-objective">Create your first objective</h2>
+        <div class="step-row">
+          <div class="step-n">1</div>
+          <div class="step-body">
+            <h3>Create a workspace</h3>
+            <p>A workspace scopes objectives, users, and credentials to a project or team. Create a new one from the board UI for your project.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-n">2</div>
+          <div class="step-body">
+            <h3>Write an objective</h3>
+            <p>An objective is a goal statement plus "done when..." acceptance criteria. Give it a clear title and a concrete description of what done looks like.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-n">3</div>
+          <div class="step-body">
+            <h3>Let it run</h3>
+            <p>The board moves the card through planning, working, and review. Each stage is a live agent session with a terminal you can watch in real time.</p>
+          </div>
+        </div>
+
+        <!-- TLS -->
+        <h2 id="tls">TLS with Caddy (public deployments)</h2>
+        <p>
+          For an internet-facing deployment, the app ports stay bound to <code>127.0.0.1</code>.
+          Caddy on the host terminates TLS on ports 80 and 443 and reverse-proxies to <code>:3002</code>.
+          Only SSH (22), HTTP (80), and HTTPS (443) are ever exposed.
+        </p>
+        <p>
+          The <strong>DigitalOcean installer</strong> (<code>install.sh</code>) wires the Caddyfile
+          for you. For a manual setup, run <code>scripts/bootstrap.sh</code> to install Caddy,
+          a firewall (ufw: 22/80/443), and fail2ban. Read <code>SECURITY.md</code> before
+          exposing the board to the internet.
+        </p>
+        <p>
+          A recommended starting point is a <strong>4 GB / 2 vCPU droplet (~$24/month)</strong> on
+          DigitalOcean plus your Claude Pro/Max subscription. TLS certificates from Let's Encrypt are free.
+        </p>
+
+        <!-- MODELS -->
+        <h2 id="models">Model keys</h2>
+        <p>
+          OperationKit routes model calls through LiteLLM, which supports every major provider.
+          Out of the box, the stack is configured for Claude (Anthropic), OpenAI, and Google Gemini via
+          the keys in <code>.env</code>.
+        </p>
+        <p>
+          To add Grok (xAI) or any other provider LiteLLM supports, add the provider's API key to
+          <code>.env</code> and update <code>config/litellm/config.yaml</code> with a model entry
+          pointing at that key. To apply new config, run <code>docker compose restart litellm</code>.
+        </p>
+        <table>
+          <thead><tr><th>Provider</th><th>Key variable</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Anthropic (Claude)</td><td>ANTHROPIC_API_KEY</td><td>Optional; agent sessions run on Claude subscription, not this key.</td></tr>
+            <tr><td>OpenAI</td><td>OPENAI_API_KEY</td><td>Optional; add to .env and config.yaml.</td></tr>
+            <tr><td>Google Gemini</td><td>GEMINI_API_KEY</td><td>Optional; add to .env and config.yaml.</td></tr>
+            <tr><td>xAI / Grok</td><td>XAI_API_KEY (or similar)</td><td>Add as a custom provider in config.yaml. LiteLLM supports xAI natively.</td></tr>
+            <tr><td>Ollama (self-hosted)</td><td>GPU_OLLAMA_URL</td><td>Set to your Ollama host URL. Leave blank if not using a local model.</td></tr>
+            <tr><td>Any LiteLLM provider</td><td>varies</td><td>Add the key and a model entry in config/litellm/config.yaml.</td></tr>
+          </tbody>
+        </table>
+
+        <!-- TEAMS -->
+        <h2 id="teams">Teams and workspaces</h2>
+        <p>
+          OperationKit is multi-tenant from day one. Each workspace is a hard boundary:
+          objectives, files, credentials, and users stay scoped to the workspace they belong to.
+          Nothing from workspace A is visible in workspace B.
+        </p>
+        <ul>
+          <li>Create workspaces per team, project, or client from the board UI.</li>
+          <li>Invite users into a workspace. Each user gets their own board view scoped to that workspace.</li>
+          <li>Admin users can see and manage all workspaces. Members see only theirs.</li>
+          <li>Credentials (API keys, integration tokens) stored in a workspace are only available to agents in that workspace.</li>
+        </ul>
+
+        <!-- TROUBLESHOOTING -->
+        <h2 id="troubleshooting">Troubleshooting first-run</h2>
+        <table>
+          <thead><tr><th>Symptom</th><th>Likely fix</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>command-center container restarts / unhealthy</td>
+              <td>Missing or blank required value in .env. Run <code>docker compose logs command-center</code>.</td>
+            </tr>
+            <tr>
+              <td>Health check on :3002 fails but container is running</td>
+              <td>Give it ~15 seconds to boot (start_period), then retry. Check the log for a bind-mount path that doesn't exist on your host.</td>
+            </tr>
+            <tr>
+              <td>LLM calls fail with auth errors</td>
+              <td>Bad or missing provider key in .env. Fix the key and run <code>docker compose restart litellm</code>.</td>
+            </tr>
+            <tr>
+              <td>Objectives queue but no sessions start</td>
+              <td>No Claude Code account is authenticated. Run <code>./scripts/claude-auth.sh a</code>.</td>
+            </tr>
+            <tr>
+              <td>Can't log in after rotating CC_JWT_SECRET</td>
+              <td>Expected. Rotating the JWT secret invalidates all existing tokens. Log in again with the new secret active.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Still stuck? Open a bug report in the GitHub repo. Onboarding friction is a first-class V1
+          bug.
+        </p>
+
+        <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to landing
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+            Star on GitHub
+          </a>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="footer" style="margin-top:0">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+          <p>An agent-powered board that runs on your server. Your data stays on your disk.</p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h4>Project</h4>
+            <a href="https://github.com/m1keluka/OperationKit" rel="noopener">GitHub</a>
+            <a href="/docs/">Setup guide</a>
+          </div>
+          <div class="footer-col">
+            <h4>Site</h4>
+            <a href="/">Landing</a>
+            <a href="/#board">The board</a>
+            <a href="/#agents">Agents</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-meta">
+        <span class="lic">
+          <a class="lic-badge" href="https://github.com/m1keluka/OperationKit/blob/main/LICENSE" rel="noopener" aria-label="License: Apache-2.0">
+            <span class="lic-k">license</span><span class="lic-v">Apache-2.0</span>
+          </a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeToggle');
+      var meta = document.querySelector('meta[name="theme-color"]');
+      function apply(t) {
+        if (t === 'dark') { root.setAttribute('data-theme', 'dark'); }
+        else { root.removeAttribute('data-theme'); }
+        if (meta) { meta.setAttribute('content', t === 'dark' ? '#0c0f14' : '#fafaf7'); }
+      }
+      if (btn) btn.addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('ok-theme', next); } catch (e) {}
+        apply(next);
+      });
+    })();
+
+    // Highlight active sidebar link on scroll
+    (function () {
+      var links = document.querySelectorAll('.docs-nav a[href^="#"]');
+      var headings = [];
+      links.forEach(function (a) {
+        var id = a.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) headings.push({ el: el, a: a });
+      });
+      if (!headings.length || !('IntersectionObserver' in window)) return;
+      var active = null;
+      function setActive(a) {
+        if (active) active.classList.remove('active');
+        active = a;
+        if (active) active.classList.add('active');
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            var found = headings.find(function (h) { return h.el === e.target; });
+            if (found) setActive(found.a);
+          }
+        });
+      }, { threshold: 0, rootMargin: '0px 0px -70% 0px' });
+      headings.forEach(function (h) { io.observe(h.el); });
+    })();
+  </script>
+</body>
+</html>
