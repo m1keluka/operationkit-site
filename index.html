@@ -321,6 +321,103 @@
       </div>
     </section>
 
+    <!-- ============ CONTEXT MANAGEMENT ============ -->
+    <section class="section" id="context" style="padding-top:8px;">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">Built-in context intelligence</p>
+          <h2>Agents that remember what matters.</h2>
+          <p class="lead">
+            Most agent systems dump everything into the context window and hope for the best.
+            OperationKit assembles context deliberately — the right knowledge, in the right order,
+            every session.
+          </p>
+        </div>
+
+        <div class="deep">
+          <!-- four-tier stack -->
+          <article class="deepblock reveal">
+            <div class="deep-body">
+              <h3>A four-tier instruction stack.</h3>
+              <p>
+                Each session loads context from the outside in — global rules, then the agent's
+                persona, then your workspace's business context, then the specific user's
+                preferences. High-confidence signal arrives first, so a late-loaded KB snippet
+                can never override a stable rule.
+              </p>
+              <div class="deep-feats">
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Global → agent → workspace → user.</b> Each tier narrows the frame without conflicting with the tier above it.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Position matters.</b> Research shows relevant information buried in the middle of a long context degrades model performance. We front-load the signal.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Every tier is a file you own.</b> Edit, version, and audit exactly what goes into every session — no black box.</span></div>
+              </div>
+            </div>
+            <div class="deep-media">
+              <div class="codeframe">
+                <div class="cf-bar"><i class="d"></i><i class="d"></i><i class="d"></i><span class="nm">context assembled at session spawn</span></div>
+                <div class="cf-body">
+<span class="l"><span class="c">── tier 1: global ──────────────────────────</span></span>
+<span class="l"><span class="k">~/.claude/CLAUDE.md</span>              <span class="c"># routing</span></span>
+<span class="l"> </span>
+<span class="l"><span class="c">── tier 2: agent persona ────────────────────</span></span>
+<span class="l"><span class="k">agents/cto.md</span>                    <span class="c"># role + skills</span></span>
+<span class="l"> </span>
+<span class="l"><span class="c">── tier 3: workspace overlay ────────────────</span></span>
+<span class="l"><span class="k">workspaces/acme/context.md</span>       <span class="c"># biz context</span></span>
+<span class="l"> </span>
+<span class="l"><span class="c">── tier 4: user profile ─────────────────────</span></span>
+<span class="l"><span class="k">users/sarah/profile.md</span>           <span class="c"># tone + prefs</span></span>
+<span class="l"> </span>
+<span class="l"><span class="c">── dynamic ──────────────────────────────────</span></span>
+<span class="l"><span class="g">↳</span> objective memory    <span class="c"># this task's history</span></span>
+<span class="l"><span class="g">↳</span> vault KB hits        <span class="c"># relevant decisions</span></span>
+<span class="l"><span class="g">↳</span> failure modes        <span class="c"># what went wrong before</span></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- memory model -->
+          <article class="deepblock reveal">
+            <div class="deep-body">
+              <h3>Working memory. Long-term memory. Both.</h3>
+              <p>
+                Human memory isn't one thing — there's what you're thinking about right now,
+                and what you know from experience. Agent memory shouldn't be one thing either.
+                OperationKit keeps them separate and connects them deliberately.
+              </p>
+              <div class="deep-feats">
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Objective memory</b> persists a scratchpad across every session on the same task — surviving restarts, account rotations, and model switches.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>The vault</b> is your long-term knowledge base — decisions, research, playbooks — queryable by every agent session, linked back to the board task that produced them.</span></div>
+                <div class="feat"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Skills are procedural memory</b> — how to do things, not what to do. An agent loads skills, doesn't infer them from a similarity search.</span></div>
+              </div>
+              <a href="docs/context/" class="btn btn-ghost" style="margin-top:18px;display:inline-flex;">Read the full architecture →</a>
+            </div>
+            <div class="deep-media">
+              <div class="codeframe">
+                <div class="cf-bar"><i class="d"></i><i class="d"></i><i class="d"></i><span class="nm">memory types</span></div>
+                <div class="cf-body">
+<span class="l"><span class="k">working memory</span></span>
+<span class="l">  <span class="w">objective-memory/&lt;id&gt;/NOTES.md</span></span>
+<span class="l">  <span class="c"># persists across every session on</span></span>
+<span class="l">  <span class="c"># this task. survives restarts.</span></span>
+<span class="l"> </span>
+<span class="l"><span class="k">long-term memory</span></span>
+<span class="l">  <span class="w">second-brain/workspaces/acme/</span></span>
+<span class="l">  <span class="c"># decisions, research, playbooks.</span></span>
+<span class="l">  <span class="c"># every doc links back to the board.</span></span>
+<span class="l"> </span>
+<span class="l"><span class="k">procedural memory</span></span>
+<span class="l">  <span class="w">skills/domain-management/SKILL.md</span></span>
+<span class="l">  <span class="c"># declared, validated, graph-checked.</span></span>
+<span class="l">  <span class="c"># not inferred. not stale.</span></span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ AND IT'S YOURS (ownership) ============ -->
     <section class="section ownership" id="yours" style="padding-top:8px;">
       <div class="wrap">
