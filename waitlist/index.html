@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OperationKit — Early access waitlist</title>
-  <meta name="description" content="OperationKit isn't public yet. Star the repo and join the waitlist to get in the day early access opens." />
+  <title>OperationKit — Star on GitHub &amp; stay updated</title>
+  <meta name="description" content="OperationKit is live on GitHub. Star the repo and join the list for release updates and news." />
   <meta name="theme-color" content="#0c0f14" />
   <meta name="robots" content="noindex" />
 
@@ -18,7 +18,7 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="OperationKit" />
-  <meta property="og:title" content="OperationKit — Early access waitlist" />
+  <meta property="og:title" content="OperationKit — Now live on GitHub" />
   <meta property="og:description" content="Star the repo and join the waitlist. One email the day early access opens — nothing else." />
   <meta property="og:url" content="https://m1keluka.github.io/operationkit-site/waitlist/" />
   <meta property="og:image" content="../og-image.png" />
@@ -92,12 +92,12 @@
   <main class="wl-main">
     <div class="wrap">
       <div class="wl-card">
-        <div class="status-pill wl-pill"><i class="live-dot"></i> Not public yet · early access</div>
+        <div class="status-pill wl-pill"><i class="live-dot"></i> Live on GitHub · self-hosted</div>
 
-        <h1>You found it early. <span class="accent">Get in first.</span></h1>
+        <h1>The repo is live. <span class="accent">Deploy it today.</span></h1>
         <p class="wl-lead">
-          OperationKit isn't open to the public yet — the code lands the moment it clears a pre-release
-          security pass. Two 10-second steps and you'll be first through the door.
+          OperationKit is open-source and available now at <b>github.com/m1keluka/OperationKit</b>.
+          Star the repo to watch releases, or drop your email below to get our updates.
         </p>
 
         <div class="wl-steps">
@@ -115,7 +115,7 @@
           <div class="wl-step">
             <span class="wl-num">2</span>
             <div>
-              <h3>Drop your email — we'll tell you the day it opens.</h3>
+              <h3>Drop your email — get release notes and updates.</h3>
               <form class="wl-form" id="wlForm" novalidate>
                 <label class="wl-hp" aria-hidden="true">
                   Company website<input type="text" name="company_website" tabindex="-1" autocomplete="off" />
@@ -124,7 +124,7 @@
                 <button class="btn btn-primary" type="submit" id="wlSubmit">Join the waitlist</button>
               </form>
               <p class="wl-msg" id="wlMsg" role="status" aria-live="polite"></p>
-              <p class="wl-note">One email when there's something real to run. No spam, no drip.</p>
+              <p class="wl-note">Low-volume updates on releases and features. No spam, no drip.</p>
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@
         });
         if (res.status === 201) {
           form.reset();
-          show('You’re on the list. Watch for launch — and thanks for the star. ⭐', 'ok');
+          show(‘You’re on the list. Thanks for the star. ⭐’, ‘ok’);
         } else if (res.status === 409) {
           form.reset();
           show('You’re already on the list. ⭐', 'ok');
