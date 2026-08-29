@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skills &amp; tools layer — OperationKit</title>
+  <meta name="description" content="How OperationKit's Tools → Skills → Agents three-layer graph works: the three-question classification rule, raw capability vs repeatable procedure vs judgment, okit validate graph checks, and the authoring CLI." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── docs-specific layout (shared with docs/index.html) ──────── */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+
+    /* ── page-specific ─────────────────────────────────────────── */
+    .ref-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+    .ref-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .ref-item .ref-title{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 3px}
+    .ref-item .ref-authors{font-size:.87rem;color:var(--muted);margin:0 0 6px}
+    .ref-item .ref-why{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+    .ref-item .ref-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:.8rem}
+
+    .layer-stack{display:flex;flex-direction:column;gap:0;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+    .layer-row{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .layer-row:last-child{border-bottom:none}
+    .layer-n{font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:var(--accent)}
+    .layer-label{font-weight:600;color:var(--ink);font-size:.97rem}
+    .layer-desc{font-size:.87rem;color:var(--text);margin-top:2px}
+    .layer-path{font-family:var(--font-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+    .q-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;margin:0 0 10px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:flex-start}
+    .q-n{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--accent);padding-top:2px;min-width:24px}
+    .q-body{}
+    .q-question{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 4px}
+    .q-answer{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+
+    .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 20px}
+    @media(max-width:500px){.stat-row{grid-template-columns:1fr}}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;text-align:center}
+    .stat-card .stat-n{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--accent);display:block;line-height:1}
+    .stat-card .stat-label{font-size:.87rem;color:var(--muted);margin-top:6px}
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="../../" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="../../#board">Board</a>
+        <a class="navlink" href="../../#agents">Agents</a>
+        <a class="navlink" href="../../#quickstart">Quickstart</a>
+        <a class="navlink" href="../" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- ── SIDEBAR NAV ── -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="../">Setup guide</a></li>
+          <li><div class="nav-label">Architecture</div></li>
+          <li><a href="../context/">Context management</a></li>
+          <li><a href="../sessions/">Session management</a></li>
+          <li><a href="../agents/">Agent architecture</a></li>
+          <li><a href="./" class="active">Skills &amp; tools</a></li>
+          <li><div class="nav-label">On this page</div></li>
+          <li><a href="#layering-rule">Three-question rule</a></li>
+          <li><a href="#tools">Tools layer</a></li>
+          <li><a href="#skills">Skills layer</a></li>
+          <li><a href="#graph-validation">Graph validation</a></li>
+          <li><a href="#authoring-cli">Authoring CLI</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+
+      <!-- ── MAIN CONTENT ── -->
+      <article class="docs-content">
+
+        <p class="eyebrow">Architecture</p>
+        <h1>Skills &amp; tools layer</h1>
+        <p class="lead" style="margin-bottom:32px">How OperationKit separates raw capability (tools), repeatable procedure (skills), and judgment (agents) — and why the separation matters for reliability at scale.</p>
+
+        <!-- THREE-QUESTION LAYERING RULE -->
+        <h2 id="layering-rule">The three-question layering rule</h2>
+        <p>Every file in <code>~/ai-workspace</code> belongs to exactly one of three layers. The classification is not subjective — it follows from three questions asked in order. The first question that answers "yes" determines the layer.</p>
+
+        <div style="margin:0 0 24px">
+          <div class="q-card">
+            <div class="q-n">1</div>
+            <div class="q-body">
+              <p class="q-question">Would this file be thrown away and rewritten if we swapped the vendor?</p>
+              <p class="q-answer">Yes → it is a <strong>tool</strong>. Replacing GoHighLevel with Close.io invalidates every endpoint, header, and credential reference in <code>tools/gohighlevel/TOOL.md</code>. The business process those calls serve survives; the connection facts do not.</p>
+            </div>
+          </div>
+          <div class="q-card">
+            <div class="q-n">2</div>
+            <div class="q-body">
+              <p class="q-question">Does it describe a repeatable job with a checkable done-condition, that a competent operator could execute without knowing our business strategy?</p>
+              <p class="q-answer">Yes → it is a <strong>skill</strong>. "Load these leads into the CRM and confirm each has an opportunity card" survives a vendor swap with edits, not a rewrite. The procedure is portable; the tool calls inside it are not.</p>
+            </div>
+          </div>
+          <div class="q-card">
+            <div class="q-n">3</div>
+            <div class="q-body">
+              <p class="q-question">Does it decide which job to run, and can it say no?</p>
+              <p class="q-answer">Yes → it is an <strong>agent</strong>. A persona with a domain, a refusal license, and escalation rules. A vendor swap changes nothing in <code>agents/coo.md</code>. Neither does a change in business strategy change the skill procedures — those are facts about a job, not opinions about priorities.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>Two shortcuts resolve most arguments before you even reach the questions:</p>
+        <ul>
+          <li><strong>Only agents have a persona and the authority to refuse.</strong> If the file cannot decline the work, it is not an agent.</li>
+          <li><strong>Only tools can be described without naming a business process.</strong> If you cannot explain the file without saying "for a client" or "before launch," it is not a tool.</li>
+        </ul>
+
+        <p>The dependency runs one way. Agents load skills; skills call tools. A tool never mentions an agent, and a skill never adopts a persona. This direction is enforced structurally: <code>okit validate</code> rejects any edge that runs against the grain.</p>
+
+        <div class="layer-stack">
+          <div class="layer-row">
+            <span class="layer-n">L3</span>
+            <div>
+              <div class="layer-label">Agents — judgment</div>
+              <div class="layer-desc">Persona, domain, refusal rules, escalation triggers. Decides which skill to run and whether to run it at all. Carries no procedure.</div>
+            </div>
+            <code class="layer-path">agents/&lt;name&gt;.md</code>
+          </div>
+          <div class="layer-row">
+            <span class="layer-n">L2</span>
+            <div>
+              <div class="layer-label">Skills — procedure</div>
+              <div class="layer-desc">Repeatable job with a declared done-condition. Calls tools; loads sub-skills. Has no persona and cannot refuse.</div>
+            </div>
+            <code class="layer-path">skills/&lt;name&gt;/SKILL.md</code>
+          </div>
+          <div class="layer-row">
+            <span class="layer-n">L1</span>
+            <div>
+              <div class="layer-label">Tools — raw capability</div>
+              <div class="layer-desc">An API, MCP server, CLI binary, database, or SDK. Connection facts, credential references, failure modes. No opinion about when to use it.</div>
+            </div>
+            <code class="layer-path">tools/&lt;name&gt;/TOOL.md</code>
+          </div>
+        </div>
+
+        <!-- TOOLS LAYER -->
+        <h2 id="tools">Tools: raw capability</h2>
+        <p>A tool is the thinnest possible adapter between OperationKit and a vendor. <code>TOOL.md</code> holds connection facts — the base URL, the auth method, the credential reference — and nothing else. It does not know why you would call the API. It does not name a business process. And critically, it names the <em>environment variable</em> that holds each secret, never the value.</p>
+
+        <pre><code>auth:
+  method: bearer-token
+  secrets:
+    - env: GHL_PIT_TOKEN
+      source: /home/mike/projects/env-master/axia-platform.env
+      required: true</code></pre>
+
+        <p>That is enough to tell a newcomer exactly what they are missing and where it lives. It is useless to anyone who steals the repo. A value in this field is a policy violation — no schema can distinguish a real key from a placeholder, so the rule is enforced by convention and enforced by code review.</p>
+
+        <p>The layout mirrors <code>skills/</code> on purpose: one main file, one optional <code>references/</code> subdirectory for overflow, one optional <code>scripts/</code> directory for runnable wrappers. Someone who can add a skill can add a tool without learning a second layout.</p>
+
+        <div class="stat-row">
+          <div class="stat-card">
+            <span class="stat-n">53</span>
+            <div class="stat-label">tools in the registry</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-n">3</span>
+            <div class="stat-label">required fields per TOOL.md<br><code style="font-size:.78rem">name · description · kind</code></div>
+          </div>
+        </div>
+
+        <h3>Why accumulated operational knowledge belongs in TOOL.md</h3>
+        <p>Every integration accumulates friction that only shows up under load: an API that requires a browser <code>User-Agent</code> header to bypass Cloudflare, a rate-limit that resets on a UTC calendar boundary rather than a rolling 24-hour window, a pagination cap buried in a vendor changelog. This knowledge normally lives in someone's head, in a Slack thread, or in a post-mortem that no one reads before the next incident.</p>
+        <p>TOOL.md has a dedicated <code>gotchas</code> section for exactly this. Failure modes that have cost someone time are first-class citizens of the tool definition — not appendices to a skill, not comments in a script. When a new session picks up a tool, the friction map comes with it. The result is institutional memory that outlasts any individual contributor.</p>
+
+        <p>This design is consistent with how Toolformer (Schick et al., 2023) framed the problem: a model that learns to invoke APIs by teaching itself from demonstrations will inevitably encounter the same failure surfaces a human would — rate limits, malformed responses, authentication edge cases. Making those surfaces explicit in a structured file rather than expecting the model to rediscover them on each run is the difference between a tool that works once and a tool that works reliably.</p>
+
+        <h3>MCP servers are tools</h3>
+        <p>Model Context Protocol servers are wired as tools, not as skill prose. Before this convention, MCP install commands were scattered: <code>skills/resend</code> carried an <code>npx -y resend-mcp</code> invocation; <code>skills/live-browser-testing</code> carried a <code>claude mcp add playwright</code> line; <code>skills/gitnexus</code> named its <code>mcp__gitnexus__*</code> tool IDs inline. Each skill taught a newcomer to install a different server in a different way.</p>
+        <p>An MCP server is a capability with a connection string — question 1 answers yes. Putting the <code>mcp</code> block in <code>TOOL.md</code> frontmatter gives one canonical install command per server and lets an install-check read <code>tools/*/TOOL.md</code> alone to answer "which servers am I missing?" <code>kind: mcp-server</code> requires the <code>mcp</code> block; the schema enforces it.</p>
+
+        <!-- SKILLS LAYER -->
+        <h2 id="skills">Skills: repeatable procedure</h2>
+        <p>A skill encodes a job — a sequence of steps that, when followed, produce a specific deliverable with a checkable done-condition. It loads tools; it may require other skills. It has no persona and cannot refuse work. If it needs judgment — whether to run at all, whether to escalate — that judgment belongs in the agent that loads it.</p>
+
+        <div class="stat-row">
+          <div class="stat-card">
+            <span class="stat-n">81</span>
+            <div class="stat-label">skills in the registry</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-n">2</span>
+            <div class="stat-label">max sub-skill depth<br><code style="font-size:.78rem">parent/child only</code></div>
+          </div>
+        </div>
+
+        <p>Skills declare their tool dependencies in frontmatter:</p>
+
+        <pre><code>name: ghl-lead-loader
+description: Upsert contacts, create opportunities, assign an owner. Re-runnable.
+tools: [gohighlevel, supabase, trellus, n8n, google-workspace]
+requires_skills: [campaign-setup]</code></pre>
+
+        <p><code>tools:</code> lists only what this skill's own procedure invokes. A router skill that hands off to a sibling does not inherit the sibling's tools — it names the sibling under <code>requires_skills:</code> and lets the sibling declare its own edges. This keeps the graph honest: every edge reflects an actual call, not a transitive dependency that might be refactored away.</p>
+
+        <h3>The sub-skill model</h3>
+        <p>A skill that is genuinely one job but has a distinct, separately-triggerable step inside it can put that step in a sub-skill at <code>skills/&lt;parent&gt;/&lt;child&gt;/SKILL.md</code>. Sub-skills are first-class graph nodes with their own frontmatter, their own <code>tools:</code> edges, and their own registry entries. <strong>Depth 2 is the maximum.</strong> A <code>SKILL.md</code> at depth 3 or deeper is a hard <code>okit validate</code> failure — if a step needs its own steps, it is a top-level skill.</p>
+        <p>The bidirectional enforcement matters: a parent that omits an on-disk child fails, and a child that names the wrong parent fails. A half-declared tree reads as real while being wrong, which is worse than a failure.</p>
+
+        <pre><code># Scaffold both ends in one command — patches parent's subskills: automatically
+okit new skill marketing/pre-call-hammer          # compound name
+okit new skill pre-call-hammer --parent marketing # identical, flag spelling</code></pre>
+
+        <h3>Why declared edges rather than RAG retrieval</h3>
+        <p>The question is why skills are loaded by explicit declaration — an agent's frontmatter listing the skills it always loads and the skills it can invoke — rather than by semantic similarity search over a skill corpus. The answer is failure mode.</p>
+        <p>A RAG retrieval that returns a topically close but procedurally wrong skill will cause the agent to attempt a real job using the wrong procedure. The agent will be confident; the context is internally consistent. There is no signal that anything is wrong until the deliverable fails review. ToolLLM (Qin et al., 2023), which studied LLM tool selection across 16,000+ real APIs, found that models confidently invoke APIs with subtly wrong parameters when the retrieval surface is large — the confidence is a property of the context, not a signal of correctness.</p>
+        <p>A confidently called skill that doesn't exist is a hallucination at the procedure level. Explicit declaration moves this failure from runtime — where it produces a plausible but wrong output — to authoring time, where the graph check catches it before the agent session starts.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>Gorilla (Patil et al., 2023) showed that retrieval-augmented tool selection reduces hallucinated API calls compared to in-context-only selection. OperationKit goes further: retrieval is replaced by declaration. The graph is the retrieval index, and the graph is validated. A skill that exists on disk but is not declared by any agent is an orphan — recorded but not invocable. No silent mis-retrieval is possible.</p>
+        </div>
+
+        <!-- GRAPH VALIDATION -->
+        <h2 id="graph-validation">Graph validation: <code>okit validate</code></h2>
+        <p>The graph check is the quality gate for the entire layer system. <code>okit validate</code> traverses the full Tools → Skills → Agents dependency graph and fails hard on any dangling edge:</p>
+        <ul>
+          <li>A skill that declares a tool not in <code>tools/registry.json</code></li>
+          <li>A skill that requires another skill that doesn't exist on disk</li>
+          <li>An agent that loads a skill that doesn't exist</li>
+          <li>A sub-skill whose <code>parent:</code> field names the wrong directory</li>
+          <li>A parent skill whose <code>subskills:</code> list omits an on-disk child</li>
+          <li>A sub-skill at depth 3 or deeper</li>
+        </ul>
+        <p>Orphans — tools no skill uses, skills no agent loads — are recorded and reported but do not fail the check. They may be available for future use, or they may be candidates for deletion. The distinction is intentional: a missing dependency is an error; an unused capability is a warning.</p>
+
+        <h3>The type-system analogy</h3>
+        <p>The analogy is exact. TypeScript catches a reference to an undefined function before the code runs. <code>okit validate</code> catches a reference to an undefined capability before the agent session starts. In both cases the alternative — discovering the error at runtime — is strictly worse: TypeScript catches it at compile time rather than production; <code>okit validate</code> catches it at commit time rather than mid-task.</p>
+        <p>Sumers et al. (2024) argue in <em>Cognitive Architectures for Language Agents</em> that agents operating on consistent, structured knowledge representations outperform those reasoning over unstructured or contradictory context. The graph enforces structural consistency automatically, and the CI check runs it on every commit that touches <code>agents/</code>, <code>skills/</code>, or <code>tools/</code>.</p>
+
+        <table>
+          <thead>
+            <tr><th>TypeScript</th><th>okit validate</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Function not defined</td>
+              <td>Skill not on disk</td>
+            </tr>
+            <tr>
+              <td>Module not found</td>
+              <td>Tool not in registry</td>
+            </tr>
+            <tr>
+              <td>Type mismatch</td>
+              <td>Sub-skill depth &gt; 2</td>
+            </tr>
+            <tr>
+              <td>Unused export</td>
+              <td>Orphan skill / tool</td>
+            </tr>
+            <tr>
+              <td>Compile error → build fails</td>
+              <td>Dangling edge → CI fails</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>HuggingGPT (Shen et al., 2023) demonstrated task planning over a large model zoo by first resolving which models exist and what they accept before committing to a plan. The key insight was that a planning step that assumes a capability it cannot verify is a reliability liability. <code>okit validate</code> makes that pre-flight check automatic and mandatory — not a planning habit but a structural gate.</p>
+
+        <!-- AUTHORING CLI -->
+        <h2 id="authoring-cli">Authoring CLI: <code>okit</code></h2>
+        <p>New tools, skills, and agents are scaffolded through <code>okit</code> rather than hand-written from scratch. The commands are symmetric:</p>
+
+        <pre><code>okit new tool  porkbun           # scaffolds tools/porkbun/TOOL.md
+okit new skill domain-management  # scaffolds skills/domain-management/SKILL.md
+okit new agent coo               # scaffolds agents/coo.md + sidecar
+okit new skill marketing/pre-call-hammer  # sub-skill: patches parent too
+okit validate                    # full graph check, exits non-zero on failure
+okit inventory --json            # machine-readable registry dump</code></pre>
+
+        <p>The scaffold writes the required frontmatter fields, sets sane defaults, and — for sub-skills — patches the parent's <code>subskills:</code> list so the graph is valid the instant the file exists. Writing a sub-skill by hand and forgetting to update the parent is the single most common authoring error; the CLI makes it structurally impossible.</p>
+
+        <h3>Why a CLI instead of a template and a README</h3>
+        <p>The alternative is a template file and a documentation page that explains how to fill it in. This is the conventional approach, and it has a known failure mode: schema enforcement happens at review time, not creation time. A reviewer reading a hand-written TOOL.md must mentally validate the frontmatter against the schema; <code>okit validate</code> does this mechanically and fails fast.</p>
+        <p>The schemas themselves — <code>docs/schemas/{tool,skill,agent}.schema.json</code> — are JSON Schema documents. The CLI validates against them at scaffold time; CI validates against them at commit time; the runtime validates against them at session-spawn time. Three independent checks, same schema. A file that reaches a session is guaranteed to be structurally valid.</p>
+        <p>The authoring path is: <code>okit new &lt;type&gt; &lt;slug&gt;</code> → fill in the scaffolded content → <code>okit validate</code> → commit. The validate step is optional only in the sense that CI will catch it anyway — the convention is to run it locally before pushing so the CI result is not the first signal of an error.</p>
+
+        <div class="note warn">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 2L2 17h16L10 2Z"/><path d="M10 8v4M10 14v.5" stroke-linecap="round"/></svg>
+          <p><strong>Never put a secret value in TOOL.md.</strong> The <code>auth.secrets[].env</code> field holds the environment-variable <em>name</em> and the path to the env-master source — never the credential itself. <code>~/ai-workspace</code> is a live shared git repository; a value committed here is a value that must be rotated.</p>
+        </div>
+
+        <!-- REFERENCES -->
+        <h2 id="references">References</h2>
+        <p>The design decisions in the Skills and Tools layer are grounded in the empirical literature on tool-augmented language models. Each citation below explains which specific finding informed a specific design choice.</p>
+
+        <ul class="ref-list">
+          <li class="ref-item">
+            <p class="ref-title">Toolformer: Language Models Can Teach Themselves to Use Tools</p>
+            <p class="ref-authors">Schick, T., Dwivedi-Kumar, S., Dessì, R., Raileanu, R., Lomeli, M., Hambro, E., Zettlemoyer, L., Cancedda, N., &amp; Scialom, T. (2023). <em>Advances in Neural Information Processing Systems</em>, 36.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Toolformer showed that models encounter the same failure surfaces — rate limits, auth edge cases, malformed responses — regardless of how they learned to call the API. Making those surfaces explicit in a structured TOOL.md <code>gotchas</code> section is the architectural response: failure modes are first-class citizens of the tool definition, not tribal knowledge that gets rediscovered on each run.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2302.04761" rel="noopener" target="_blank">arxiv.org/abs/2302.04761 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs</p>
+            <p class="ref-authors">Qin, Y., Liang, S., Ye, Y., Zhu, K., Yan, L., Lu, Y., Lin, Y., Cong, X., Tang, X., Qian, B., Zhao, S., Tian, R., Xie, R., Zhou, J., Gerstein, M. H., Li, D., Liu, Z., &amp; Sun, M. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Across a 16,000+ API surface, ToolLLM found that models confidently invoke APIs with subtly wrong parameters when the retrieval surface is large — the confidence is a property of the context, not a signal of correctness. This directly motivates replacing retrieval with explicit declaration: a skill that is not declared cannot be mis-retrieved. The graph becomes the index, and the graph is validated.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2307.16789" rel="noopener" target="_blank">arxiv.org/abs/2307.16789 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Gorilla: Large Language Model Connected with Massive APIs</p>
+            <p class="ref-authors">Patil, S. G., Zhang, T., Wang, X., &amp; Gonzalez, J. E. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Gorilla demonstrated that retrieval-augmented tool selection reduces hallucinated API calls compared to in-context-only selection. OperationKit takes this further: the retrieval index is replaced by a validated graph. A skill that exists on disk but is not declared by any agent is an orphan — it cannot be mis-retrieved because it is not in the selection pool. No silent wrong-tool invocation is possible.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2305.15334" rel="noopener" target="_blank">arxiv.org/abs/2305.15334 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in HuggingFace</p>
+            <p class="ref-authors">Shen, Y., Song, K., Tan, X., Li, D., Lu, W., &amp; Zhuang, Y. (2023). <em>Advances in Neural Information Processing Systems</em>, 36.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> HuggingGPT's key reliability insight was task planning over a resolved model zoo — first confirm which models exist and what they accept, then commit to a plan. The same insight underlies <code>okit validate</code>: a planning step that assumes a capability it cannot verify is a reliability liability. The graph check makes that pre-flight verification automatic and mandatory rather than a discipline that each agent session must remember to apply.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2303.17580" rel="noopener" target="_blank">arxiv.org/abs/2303.17580 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Cognitive Architectures for Language Agents</p>
+            <p class="ref-authors">Sumers, T. R., Yao, S., Narasimhan, K., &amp; Griffiths, T. L. (2024). <em>Transactions on Machine Learning Research</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Sumers et al. map agent architectures onto cognitive science frameworks, distinguishing declarative knowledge (facts about the world), procedural knowledge (how to act), and deliberative control (which action to take when). The three-layer graph maps directly: tools are declarative facts (API endpoints, credential references), skills are procedural memory (how to execute a job), agents are the deliberative control layer (which skill to run and whether to run it). The finding that agents operating on consistent, structured representations outperform those reasoning over unstructured context is the empirical justification for enforcing that structure with a graph check rather than relying on prompt discipline.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2309.02427" rel="noopener" target="_blank">arxiv.org/abs/2309.02427 ↗</a>
+          </li>
+        </ul>
+
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle (shared behavior)
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('ok-theme', next); } catch(e) {}
+      });
+    }
+    // Active section tracking
+    const sections = document.querySelectorAll('h2[id], h3[id]');
+    const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+    if (sections.length && navLinks.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            const a = document.querySelector(`.docs-nav a[href="#${e.target.id}"]`);
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(s => obs.observe(s));
+    }
+  </script>
+</body>
+</html>
