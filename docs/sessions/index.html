@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Session management — OperationKit</title>
+  <meta name="description" content="How OperationKit manages agent sessions: tmux isolation, per-objective worktree sandboxing, a bare supervisor loop, account rotation for concurrency, and the worktree guard as write-side access control." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── docs-specific layout (shared with docs/index.html) ──────── */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+
+    /* ── page-specific ─────────────────────────────────────────── */
+    .ref-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+    .ref-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .ref-item .ref-title{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 3px}
+    .ref-item .ref-authors{font-size:.87rem;color:var(--muted);margin:0 0 6px}
+    .ref-item .ref-why{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+    .ref-item .ref-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:.8rem}
+
+    .deepblock{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px 22px;margin:0 0 20px}
+    .deepblock .db-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+    .deepblock .db-title{font-weight:600;color:var(--ink);font-size:1.05rem;margin:0 0 6px}
+    .deepblock .db-body{font-size:.93rem;color:var(--text);margin:0;line-height:1.6}
+
+    .prop-table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.92rem}
+    .prop-table th{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 10px;border-bottom:2px solid var(--border)}
+    .prop-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .prop-table td:first-child{color:var(--ink);font-weight:500;white-space:nowrap;font-family:var(--font-mono);font-size:.82rem}
+    .prop-table tr:last-child td{border-bottom:none}
+
+    .codeframe{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    .codeframe .cf-comment{color:var(--muted)}
+
+    .account-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 20px}
+    @media(max-width:640px){.account-grid{grid-template-columns:repeat(3,1fr)}}
+    .account-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;text-align:center}
+    .account-card .ac-name{font-family:var(--font-mono);font-size:.78rem;color:var(--ink);font-weight:600;margin-bottom:4px}
+    .account-card .ac-slots{font-size:.82rem;color:var(--text)}
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="../../" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="../../#board">Board</a>
+        <a class="navlink" href="../../#agents">Agents</a>
+        <a class="navlink" href="../../#quickstart">Quickstart</a>
+        <a class="navlink" href="../" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- ── SIDEBAR NAV ── -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="../">Setup guide</a></li>
+          <li><div class="nav-label">Architecture</div></li>
+          <li><a href="../context/">Context management</a></li>
+          <li><a href="./" class="active">Session management</a></li>
+          <li><div class="nav-label">On this page</div></li>
+          <li><a href="#execution-model">Execution model</a></li>
+          <li><a href="#worktree-isolation">Worktree isolation</a></li>
+          <li><a href="#supervisor-model">Supervisor model</a></li>
+          <li><a href="#account-rotation">Account rotation</a></li>
+          <li><a href="#worktree-guard">Worktree guard</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+
+      <!-- ── MAIN CONTENT ── -->
+      <article class="docs-content">
+
+        <p class="eyebrow">Architecture</p>
+        <h1>Session management</h1>
+        <p class="lead" style="margin-bottom:32px">How OperationKit spawns, isolates, supervises, and safely terminates the Claude Code processes that execute objectives — and why each design decision exists.</p>
+
+        <!-- EXECUTION MODEL -->
+        <h2 id="execution-model">Execution model</h2>
+        <p>Every objective runs as exactly one Claude Code session: a <code>claude --print</code> process invoked with a turn budget, a fully assembled context document, and a goal. The session reads, plans, writes code, calls APIs, and either completes or reports a blocker. It does not stream interactively; <code>--print</code> runs headlessly and exits when Claude finishes its response.</p>
+        <p>Sessions are created by <code>session-manager.ts</code>, the backend service that sits between the board database and the host's process table. When an objective moves to <code>working</code> status the manager:</p>
+        <ol>
+          <li>Selects a free <code>ccuser-*</code> account (see <a href="#account-rotation">Account rotation</a>).</li>
+          <li>Creates the per-objective worktree at <code>/tmp/cc-worktree-{id}/</code>.</li>
+          <li>Assembles the context document from the four-tier stack, KB hits, and objective memory.</li>
+          <li>Opens a tmux window under the selected account's tmux server and runs <code>claude --print &lt;context&gt;</code> inside it.</li>
+        </ol>
+
+        <h3>Why tmux?</h3>
+        <p>The choice of tmux as the session container is deliberate and operational. A plain <code>child_process.spawn</code> call inside Node.js ties the Claude process's lifetime to the Node process. When the backend restarts — for a deploy, a crash, or a server reboot — any in-flight agent session is killed. At scale, with 25 concurrent sessions, this produces cascading data loss every time you ship a backend fix.</p>
+        <p>A tmux session is independent of the process that created it. The Node backend can exit, restart, and reconnect to the tmux server without disturbing running Claude processes. The session-manager reattaches by looking up the tmux window name — which it sets to the objective ID — and polling for completion. Sessions survive backend restarts entirely.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>Yang et al. (2024) note in SWE-agent that the <strong>agent–computer interface</strong> — the mechanism through which an agent interacts with its execution environment — shapes agent behavior as much as the underlying model. A fragile interface (processes killed on restart) forces defensive patterns that consume context budget. A durable interface (tmux) lets the agent focus on the task.</p>
+        </div>
+
+        <p>The tradeoff is operational complexity: tmux windows accumulate, completed sessions must be explicitly reaped, and debugging requires attaching to a named window rather than reading a log file. OperationKit accepts this complexity because the alternative — restarting in-flight sessions — is worse at scale.</p>
+
+        <!-- WORKTREE ISOLATION -->
+        <h2 id="worktree-isolation">Per-objective worktree isolation</h2>
+        <p>Before spawning a session, <code>session-manager.ts</code> creates a git worktree for the objective at <code>/tmp/cc-worktree-{objective_id}/</code>. The session works exclusively inside this directory. It never touches the live checkout at <code>/home/mike/projects/&lt;repo&gt;</code>.</p>
+
+        <div class="deepblock">
+          <div class="db-label">Worktree lifecycle</div>
+          <div class="db-title">Created before spawn → used for the session's lifetime → reaped after completion</div>
+          <p class="db-body">The worktree is a full working tree with its own index, checked out to a feature branch named after the objective. Git operations (commit, push) run inside the worktree and are scoped to that branch. The live checkout's branch and index are untouched.</p>
+        </div>
+
+        <p>The path uses the objective ID rather than a branch name or repo name to guarantee uniqueness. Two sessions running against different repos for the same objective would still get different paths; two sessions running against the same repo for different objectives never share a directory.</p>
+
+        <h3>The 2026-04-25 production crash</h3>
+        <p>Worktree isolation became non-optional after an incident on 2026-04-25. Prior to that date, sessions operated directly inside the live checkout. A session that was debugging a routing bug in <code>operationkit-site</code> made a <code>git reset --hard</code> call while a concurrent session was mid-commit to the same directory. The reset won. The concurrent session's staged changes were discarded, and the files reverted to the commit before the other session's work.</p>
+        <p>More seriously: the Node backend process runs from the same live checkout. The reset moved the backend's source files mid-execution, causing a require-cache mismatch that corrupted three in-flight database writes. Recovery required a manual restore from a 6-hour-old snapshot.</p>
+        <p>The post-incident fix was two-layered: worktrees for path isolation, and the worktree guard hook for write-side access control. Together they make it physically impossible for a session to affect a directory it was not assigned.</p>
+
+        <div class="note warn">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 2.5 2.5 17.5h15L10 2.5Z"/><path d="M10 8v5M10 14.5v.5"/></svg>
+          <p>The worktree directory is under <code>/tmp</code> and does not survive a full server reboot. If the host reboots while a session is in flight, the session's in-progress file changes are lost. The session's committed work (already pushed to the remote) is safe. OperationKit does not currently checkpoint uncommitted changes; this is a known limitation.</p>
+        </div>
+
+        <!-- SUPERVISOR MODEL -->
+        <h2 id="supervisor-model">Supervisor model</h2>
+        <p>The entrypoint for the OperationKit backend is <code>entrypoint.sh</code>: a shell script that starts the Node process and loops on it forever.</p>
+
+        <pre class="codeframe"><code><span class="cf-comment">#!/bin/bash
+# entrypoint.sh — the entire supervisor</span>
+while true; do
+  node dist/index.js
+  echo "process exited with $? — restarting in 2s"
+  sleep 2
+done</code></pre>
+
+        <p>There is no pm2, no systemd unit, no foreman. The supervisor is a bare <code>while true</code> loop that restarts the Node process if it exits for any reason — crash, OOM kill, or explicit shutdown. The 2-second sleep prevents a tight restart loop from consuming CPU during a persistent crash.</p>
+
+        <h3>Design rationale</h3>
+        <p>The decision to use a bare shell loop rather than a process manager is pragmatic rather than principled. OperationKit runs on a single Docker container that is itself managed by the host's container runtime. A crash that kills Node is almost certainly a bug in the application, not a workload scheduling problem. pm2's cluster mode and systemd's socket activation add complexity that has no payoff in a single-process, single-container deployment.</p>
+
+        <h3>What breaks</h3>
+        <p>Honesty requires documenting the known failure modes of this approach:</p>
+
+        <table class="prop-table">
+          <thead>
+            <tr><th>Failure</th><th>Behavior</th><th>Mitigation</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Node process crash</td>
+              <td>All pending HTTP requests are dropped. Clients see a connection reset.</td>
+              <td>2-second restart. In-flight sessions survive in tmux and are reattached on reconnect.</td>
+            </tr>
+            <tr>
+              <td>OOM kill</td>
+              <td>Same as crash. If the OOM condition persists, the loop crashes on restart too.</td>
+              <td>Container memory limit alerts via the host's monitoring. No automatic remediation.</td>
+            </tr>
+            <tr>
+              <td>Persistent crash loop</td>
+              <td>The 2-second sleep throttles CPU, but the process restarts indefinitely. No circuit breaker.</td>
+              <td>Logs emit the exit code on each restart. Operator must intervene.</td>
+            </tr>
+            <tr>
+              <td>Graceful drain on deploy</td>
+              <td>No graceful shutdown hook. A deploy kills the process mid-request.</td>
+              <td>Accepted: deploys are rare and the restart is fast. In-flight sessions are not affected (tmux).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>A production system serving external customers would want a proper process manager, health checks, and a graceful drain path. OperationKit trades that reliability ceiling for operational simplicity, which is reasonable for an internal tool running on a known-good VPS with low traffic.</p>
+
+        <!-- ACCOUNT ROTATION -->
+        <h2 id="account-rotation">Account rotation</h2>
+        <p>Each Claude Code session runs under a distinct system account: <code>ccuser-0</code> through <code>ccuser-4</code>. The session-manager maintains a pool of these accounts and assigns one to each new session, rotating to the next free account when all slots under the current account are occupied.</p>
+
+        <div class="account-grid">
+          <div class="account-card">
+            <div class="ac-name">ccuser-0</div>
+            <div class="ac-slots">5 slots</div>
+          </div>
+          <div class="account-card">
+            <div class="ac-name">ccuser-1</div>
+            <div class="ac-slots">5 slots</div>
+          </div>
+          <div class="account-card">
+            <div class="ac-name">ccuser-2</div>
+            <div class="ac-slots">5 slots</div>
+          </div>
+          <div class="account-card">
+            <div class="ac-name">ccuser-3</div>
+            <div class="ac-slots">5 slots</div>
+          </div>
+          <div class="account-card">
+            <div class="ac-name">ccuser-4</div>
+            <div class="ac-slots">5 slots</div>
+          </div>
+        </div>
+
+        <p>The reason is Anthropic's per-account API rate limits. Claude Code sessions make API calls against the account's Claude subscription. A single account with 25 concurrent sessions would saturate its rate limit budget and begin returning 429s, stalling all sessions simultaneously. Five accounts with 5 sessions each distribute the load: a rate-limit event on one account stalls only its 5 sessions while the other 20 continue.</p>
+
+        <h3>What rotation buys</h3>
+        <p>Account rotation is not a reliability mechanism — it doesn't prevent rate limiting, it distributes its blast radius. The practical effect is that the board can sustain 25 concurrent sessions without systematically stalling, as long as no single account's 5 sessions all make simultaneous heavy API calls. In practice this is rare: sessions interleave tool calls (filesystem reads, git operations, API calls) with model inference, and the inference spikes are spread across different phases of different objectives.</p>
+
+        <p>Each account has its own tmux server, home directory, and shell environment. This provides incidental isolation: a session under <code>ccuser-2</code> cannot accidentally read <code>ccuser-0</code>'s shell history or environment variables. The worktree guard provides stronger isolation for filesystem writes (see below); account separation is defense-in-depth for the shell layer.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>Liu et al. (2023) in AgentBench document that real-world agent deployments face infrastructure constraints — rate limits, resource contention, host memory — that are entirely orthogonal to the agent's reasoning capability. Account rotation is OperationKit's answer to the rate-limit constraint: it reframes it as a scheduling problem rather than a capacity problem.</p>
+        </div>
+
+        <!-- WORKTREE GUARD -->
+        <h2 id="worktree-guard">The worktree guard as write-side access control</h2>
+        <p>The worktree guard is a PreToolUse hook registered in every session's Claude Code configuration. It intercepts every file-write tool call — <code>Write</code>, <code>Edit</code>, <code>NotebookEdit</code>, and shell commands that write to disk — before execution and validates that the target path falls inside the session's assigned worktree.</p>
+
+        <pre class="codeframe"><code><span class="cf-comment"># worktree-guard.sh (simplified)</span>
+ASSIGNED_WORKTREE="/tmp/cc-worktree-${OBJECTIVE_ID}"
+TARGET_PATH="$1"
+
+# Resolve to canonical absolute path
+RESOLVED=$(realpath -m "$TARGET_PATH" 2>/dev/null || echo "$TARGET_PATH")
+
+case "$RESOLVED" in
+  "${ASSIGNED_WORKTREE}/"*)
+    exit 0   <span class="cf-comment"># allowed: inside assigned worktree</span>
+    ;;
+  /tmp/*)
+    exit 0   <span class="cf-comment"># allowed: scratch space</span>
+    ;;
+  *)
+    echo "BLOCKED: write to '$TARGET_PATH' outside worktree" >&2
+    exit 1   <span class="cf-comment"># denied: Claude Code sees a tool call rejection</span>
+    ;;
+esac</code></pre>
+
+        <p>A rejection causes Claude Code to treat the tool call as failed and include the error message in the model's next turn. The model sees "BLOCKED: write to … outside worktree" and can adjust — typically by writing to a path inside its worktree or explicitly asking for permission. It cannot bypass the hook; the hook runs at the harness layer, below the model.</p>
+
+        <h3>Why this is the only guard that matters</h3>
+        <p>The worktree directory structure provides path isolation, but path isolation is not access control. A session that knows the path of another session's worktree can still write to it if the filesystem allows it. Under a naive setup, all <code>ccuser-*</code> accounts have write access to <code>/tmp</code>, which means any session can write to any other session's worktree.</p>
+        <p>The worktree guard closes this gap at the tool call layer, not the filesystem layer. This is intentional: Claude Code is the only thing making filesystem writes in a session. Blocking at the Claude Code tool layer is sufficient because there is no other write path. A session that tried to bypass the guard by running raw shell commands through the Bash tool would still hit the guard — the hook intercepts Bash tool calls too, scanning the command string for write operations against out-of-scope paths.</p>
+
+        <div class="deepblock">
+          <div class="db-label">Access control model</div>
+          <div class="db-title">Tool-layer enforcement, not filesystem ACL</div>
+          <p class="db-body">The guard deliberately does not use Linux filesystem permissions (chown, chmod, ACL). Filesystem ACLs are coarser, harder to update per-session, and create maintenance overhead when accounts are rotated. The tool-layer approach is scoped to exactly the capabilities Claude Code exposes, which is the correct scope: we are controlling what the <em>agent</em> can do, not what the <em>account</em> can do.</p>
+        </div>
+
+        <p>The 2026-04-25 production crash (documented in <a href="#worktree-isolation">Worktree isolation</a>) would not have occurred if the worktree guard had been in place. The session that called <code>git reset --hard</code> was operating inside the live checkout — a path that the guard would have blocked. The guard was retroactively identified as the missing safeguard and was added as part of the post-incident remediation.</p>
+
+        <p>Yang et al. (2023) in InterCode observe that agent systems operating in interactive coding environments need <strong>execution feedback</strong> — the environment must tell the agent what happened, including what was blocked. The worktree guard implements this: the rejection message is surfaced directly into the model's context, giving it accurate information about why the write failed and what it should do instead. A silent block (filesystem permission denied with no message) would cause the model to retry blindly.</p>
+
+        <!-- REFERENCES -->
+        <h2 id="references">References</h2>
+        <p>The engineering decisions above draw on published research in agent systems, coding agents, and interactive execution environments.</p>
+
+        <ul class="ref-list">
+          <li class="ref-item">
+            <p class="ref-title">SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering</p>
+            <p class="ref-authors">Yang, J., Jimenez, C. E., Wettig, A., Lieret, K., Yao, S., Narasimhan, K., &amp; Press, O. (2024). <em>arXiv preprint</em> arxiv:2405.15793.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Establishes the agent–computer interface (ACI) as a first-class design concern: the mechanism through which an agent interacts with its environment shapes behavior as much as the underlying model. OperationKit's tmux container and worktree directory are its ACI — designed to be durable (sessions survive backend restarts) and bounded (writes cannot escape the assigned worktree).</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2405.15793" rel="noopener" target="_blank">arxiv.org/abs/2405.15793 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">AgentBench: Evaluating LLMs as Agents</p>
+            <p class="ref-authors">Liu, X., Yu, H., Zhang, H., Xu, Y., Lei, X., Lai, H., … &amp; Tang, J. (2023). <em>arXiv preprint</em> arxiv:2308.03688.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Documents the gap between LLM benchmark performance and real-world agent deployment, including infrastructure constraints like rate limits and resource contention that are orthogonal to model capability. Motivates OperationKit's account rotation design: distributing sessions across accounts is a scheduling solution to an infrastructure constraint, not a model-quality concern.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2308.03688" rel="noopener" target="_blank">arxiv.org/abs/2308.03688 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">InterCode: Standardizing and Benchmarking Interactive Coding with Execution Feedback</p>
+            <p class="ref-authors">Yang, J., Prabhakar, A., Narasimhan, K., &amp; Yao, S. (2023). <em>Advances in Neural Information Processing Systems</em>, 36. arxiv:2306.14898.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Demonstrates that agents operating in interactive coding environments require execution feedback — the environment must communicate what happened, including what failed and why. Directly informs the worktree guard's design: rejection messages are surfaced into the model's context so it can adapt, rather than failing silently and causing blind retries.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2306.14898" rel="noopener" target="_blank">arxiv.org/abs/2306.14898 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments</p>
+            <p class="ref-authors">Xie, T., Zhang, D., Chen, J., Li, X., Zhao, S., Cao, R., … &amp; Yu, T. (2024). <em>arXiv preprint</em> arxiv:2404.07972.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Benchmarks agents operating in real computer environments and measures the gap between sandbox success and real-environment success — isolation and sandboxing that work in benchmarks must also hold in production. Informs OperationKit's decision to enforce worktree isolation at the tool layer (not just at setup time), because the real environment contains live data and concurrent processes that benchmarks typically abstract away.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2404.07972" rel="noopener" target="_blank">arxiv.org/abs/2404.07972 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Voyager: An Open-Ended Embodied Agent with Large Language Models</p>
+            <p class="ref-authors">Wang, G., Xie, Y., Jiang, Y., Mandlekar, A., Xiao, C., Zhu, Y., Fan, L., &amp; Anandkumar, A. (2023). <em>arXiv preprint</em> arxiv:2305.16291.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Introduces the concept of a persistent skill library that agents accumulate across sessions — analogous to OperationKit's skills layer — and demonstrates that long-running agents need external memory and execution continuity across restarts. The tmux-based session model directly addresses the continuity requirement: skills persist on disk, sessions persist in tmux, and neither is lost when the orchestrating process restarts.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2305.16291" rel="noopener" target="_blank">arxiv.org/abs/2305.16291 ↗</a>
+          </li>
+        </ul>
+
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle (shared behavior)
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('ok-theme', next); } catch(e) {}
+      });
+    }
+    // Active section tracking
+    const sections = document.querySelectorAll('h2[id], h3[id]');
+    const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+    if (sections.length && navLinks.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            const a = document.querySelector(`.docs-nav a[href="#${e.target.id}"]`);
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(s => obs.observe(s));
+    }
+  </script>
+</body>
+</html>
