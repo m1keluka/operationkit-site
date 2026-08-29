@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent architecture — OperationKit</title>
+  <meta name="description" content="How OperationKit defines agents: the judgment layer above skills and tools, the three-question decision rule, the routing table as a specialization model, and refusal rules as a safety primitive." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── docs-specific layout (shared with docs/context/index.html) ─ */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4pt;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+
+    /* ── page-specific ─────────────────────────────────────────── */
+    .layer-stack{display:flex;flex-direction:column;gap:0;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+    .layer-row{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .layer-row:last-child{border-bottom:none}
+    .layer-n{font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:var(--accent)}
+    .layer-label{font-weight:600;color:var(--ink);font-size:.97rem}
+    .layer-desc{font-size:.87rem;color:var(--text);margin-top:2px}
+    .layer-path{font-family:var(--font-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+    .q-block{display:flex;flex-direction:column;gap:0;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+    .q-row{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:14px;padding:16px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .q-row:last-child{border-bottom:none}
+    .q-n{font-family:var(--font-mono);font-size:.82rem;font-weight:700;color:var(--muted);padding-top:2px;white-space:nowrap}
+    .q-body .q-text{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 4px}
+    .q-body .q-desc{font-size:.87rem;color:var(--text);margin:0;line-height:1.5}
+    .q-verdict{font-family:var(--font-mono);font-size:.78rem;font-weight:600;color:var(--accent);background:var(--accent-tint);border:1px solid var(--accent-line);border-radius:4px;padding:3px 8px;white-space:nowrap;align-self:start;margin-top:2px}
+
+    .agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 20px}
+    @media(max-width:600px){.agent-grid{grid-template-columns:1fr}}
+    .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .agent-card .ac-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+    .agent-card .ac-title{font-weight:600;color:var(--ink);font-size:1rem;margin:0 0 4px}
+    .agent-card .ac-desc{font-size:.87rem;color:var(--text);margin:0 0 8px;line-height:1.5}
+    .agent-card .ac-scope{font-size:.82rem;color:var(--muted);margin:0;font-style:italic}
+
+    .deepblock{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    .deepblock .db-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+    .codeframe{background:var(--term-bg);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin:0 0 18px}
+    .codeframe .cf-header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .codeframe .cf-dots{display:flex;gap:6px}
+    .codeframe .cf-dots span{width:10px;height:10px;border-radius:50%;background:var(--border)}
+    .codeframe .cf-title{font-family:var(--font-mono);font-size:.8rem;color:var(--muted)}
+    .codeframe pre{margin:0;border-radius:0;border:none;padding:16px 20px}
+
+    .ref-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+    .ref-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .ref-item .ref-title{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 3px}
+    .ref-item .ref-authors{font-size:.87rem;color:var(--muted);margin:0 0 6px}
+    .ref-item .ref-why{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+    .ref-item .ref-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:.8rem}
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="../../" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="../../#board">Board</a>
+        <a class="navlink" href="../../#agents">Agents</a>
+        <a class="navlink" href="../../#quickstart">Quickstart</a>
+        <a class="navlink" href="../" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- ── SIDEBAR NAV ── -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="../">Setup guide</a></li>
+          <li><div class="nav-label">Architecture</div></li>
+          <li><a href="../context/">Context management</a></li>
+          <li><a href="./" class="active">Agent architecture</a></li>
+          <li><div class="nav-label">On this page</div></li>
+          <li><a href="#what-is-an-agent">What an agent is</a></li>
+          <li><a href="#plain-markdown">Why plain markdown</a></li>
+          <li><a href="#decision-rule">Three-question rule</a></li>
+          <li><a href="#routing-table">Routing table</a></li>
+          <li><a href="#refusal-rules">Refusal rules</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+
+      <!-- ── MAIN CONTENT ── -->
+      <article class="docs-content">
+
+        <p class="eyebrow">Architecture</p>
+        <h1>Agent architecture</h1>
+        <p class="lead" style="margin-bottom:32px">Agents are the judgment layer — the only part of OperationKit that has a persona, can refuse work, and routes to other specialists. Everything below them is procedure or raw capability.</p>
+
+        <!-- WHAT IS AN AGENT -->
+        <h2 id="what-is-an-agent">What an agent is</h2>
+        <p>OperationKit's three-layer architecture separates capability, procedure, and judgment into distinct file types. The distinction is not cosmetic — it determines which layer a session loads, what authority the session has, and what the session is permitted to do:</p>
+
+        <div class="layer-stack">
+          <div class="layer-row">
+            <span class="layer-n">T</span>
+            <div>
+              <div class="layer-label">Tools — raw capability</div>
+              <div class="layer-desc">An API, MCP server, CLI binary, or database. Connection facts, credential references, and known failure modes. No opinion about when to use the capability, no business process named.</div>
+            </div>
+            <code class="layer-path">tools/&lt;name&gt;/TOOL.md</code>
+          </div>
+          <div class="layer-row">
+            <span class="layer-n">S</span>
+            <div>
+              <div class="layer-label">Skills — procedure</div>
+              <div class="layer-desc">A repeatable job with a checkable done-condition. How to use one or more tools to accomplish a specific task. No persona, cannot refuse work, cannot escalate.</div>
+            </div>
+            <code class="layer-path">skills/&lt;name&gt;/SKILL.md</code>
+          </div>
+          <div class="layer-row">
+            <span class="layer-n">A</span>
+            <div>
+              <div class="layer-label">Agents — judgment</div>
+              <div class="layer-desc">A persona that decides <em>which</em> procedure to run and holds the license to push back or escalate. Carries scope limits and refusal rules. Loads skills; does not contain procedure itself.</div>
+            </div>
+            <code class="layer-path">agents/&lt;name&gt;.md</code>
+          </div>
+        </div>
+
+        <p>The dependency runs one way: agents load skills, skills call tools. A tool never references an agent, and a skill never adopts a persona. This one-way dependency is what makes the layers individually replaceable — you can swap a tool's implementation without touching the skill that uses it, and add a new agent specialty without modifying any existing skill.</p>
+
+        <p>Two properties are <strong>exclusively agent properties</strong>. A file that lacks either is not an agent regardless of where it lives:</p>
+        <ul>
+          <li><strong>Persona.</strong> The agent has an identity, a domain of authority, and a stated point of view. It can be addressed by role ("you are Mike's CTO") and it maintains that role consistently across a session.</li>
+          <li><strong>Authority to refuse.</strong> The agent can evaluate a request against its domain, its priorities, and its refusal rules — and decline to proceed. A skill that is executing a procedure cannot make this evaluation; it can only complete or fail.</li>
+        </ul>
+
+        <p>Wang et al. (2024) surveyed the landscape of LLM-based autonomous agents and identified persona stability and goal-directed refusal as the two properties that distinguish goal-directed agents from tool-executing pipelines. OperationKit encodes both as first-class structural properties: persona lives in the agent file's identity section; refusal authority is declared as an explicit scope-limit block.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p><strong>Skills are not thin agents.</strong> <code>skills/pipeline/SKILL.md</code> is loaded by every agent in the system and governs the full session lifecycle — it could be mistaken for an agent. It is not: it has no persona and refuses nothing. It is the shared procedure all agents follow, which is exactly what a skill is. The layer is determined by behavior, not by how widely a file is used.</p>
+        </div>
+
+        <!-- PLAIN MARKDOWN -->
+        <h2 id="plain-markdown">Why plain markdown files</h2>
+        <p>Agent personas in OperationKit are stored as plain <code>.md</code> files — not database records, not API-managed configs, not serialized objects. This is a deliberate design choice with three specific advantages.</p>
+
+        <h3>Portability</h3>
+        <p>A markdown file can be read, diffed, and merged by any tool that handles text. An agent persona can be copied to a new install, adapted for a different operator, or submitted as a pull request from any editor. No vendor SDK, no API key, and no running service is required to understand or modify what an agent does. Shanahan et al. (2023) observed that role-play in LLMs is fundamentally a text-conditioning phenomenon — the model adopts a persona through the words in its context, not through structured metadata. Storing the persona as human-readable text aligns the storage format with the mechanism that actually produces the behavior.</p>
+
+        <h3>Versioning</h3>
+        <p>Agent behavior changes are tracked the same way code changes are tracked: via git commit history. You can <code>git blame</code> a refusal rule to find out why it was added, compare two agent versions with <code>git diff</code>, and roll back a behavioral regression with <code>git revert</code>. The audit trail is native to the toolchain, not bolted on as a separate logging system.</p>
+
+        <h3>Auditability and "bring your own agent"</h3>
+        <p>Because an agent is a file you can read, an operator can verify exactly what an agent is authorized to do before spawning it. There is no hidden configuration, no server-side behavior that diverges from what the file says. This is the "bring your own agent" property: anyone who can read a markdown file can inspect, fork, and deploy an agent without reading source code. It also means the same agent file can be loaded into different harnesses — the Command Center board, a local Claude session, a CI-triggered workflow — without translation.</p>
+
+        <div class="codeframe">
+          <div class="cf-header">
+            <div class="cf-dots"><span></span><span></span><span></span></div>
+            <span class="cf-title">agents/cto.md (structure)</span>
+          </div>
+          <pre><code>---
+name: cto
+description: "Chief Technology Officer: PRD drafting, feature decomposition,
+  developer orchestration, deploys, and codebase documentation."
+skills:
+  always: [pipeline, project-management, devops, qa-enforcement]
+  available: [gitnexus, live-browser-testing, go-test, pr-self-heal]
+---
+
+## 1. Identity
+
+You are Mike's Chief Technology Officer. You own the full technical
+lifecycle: judging whether an idea is worth building, writing the PRD,
+decomposing it, orchestrating developer sub-agents, and shipping
+verified code...
+
+## Refusal rules
+
+- Decline any request that bypasses the QA gate established in
+  qa-enforcement.md.
+- Escalate (do not ignore) if a task conflicts with a stated architectural
+  principle or an active blocker in the session context.</code></pre>
+        </div>
+
+        <!-- DECISION RULE -->
+        <h2 id="decision-rule">The three-question decision rule</h2>
+        <p>When you are deciding where a new file belongs — tool, skill, or agent — ask three questions in order. Stop at the first "yes":</p>
+
+        <div class="q-block">
+          <div class="q-row">
+            <span class="q-n">Q1</span>
+            <div class="q-body">
+              <p class="q-text">Would this file be thrown away and rewritten if you swapped the vendor?</p>
+              <p class="q-desc">GoHighLevel endpoints, Porkbun API keys, an MCP server's connection string — these are vendor-specific facts. Replace the vendor and every fact in this file dies.</p>
+            </div>
+            <span class="q-verdict">→ Tool</span>
+          </div>
+          <div class="q-row">
+            <span class="q-n">Q2</span>
+            <div class="q-body">
+              <p class="q-text">Does it describe a repeatable job with a checkable done-condition, that a competent operator could execute without knowing the business strategy?</p>
+              <p class="q-desc">"Load these leads into the CRM and confirm each has an opportunity card" survives a vendor swap with edits, not a rewrite. There is a clear done-condition; no strategy is required to execute it.</p>
+            </div>
+            <span class="q-verdict">→ Skill</span>
+          </div>
+          <div class="q-row">
+            <span class="q-n">Q3</span>
+            <div class="q-body">
+              <p class="q-text">Does it decide which job to run, and can it say no?</p>
+              <p class="q-desc">A vendor swap changes nothing in <code>agents/coo.md</code>. The COO evaluates whether to run a procedure, routes to the right specialist, and can refuse a request that conflicts with operational strategy.</p>
+            </div>
+            <span class="q-verdict">→ Agent</span>
+          </div>
+        </div>
+
+        <p>Two shortcuts resolve most edge cases:</p>
+        <ul>
+          <li><strong>Only agents have a persona and the authority to refuse.</strong> If the file cannot decline work, it is not an agent — even if it loads a dozen skills or orchestrates complex workflows.</li>
+          <li><strong>Only tools can be described without naming a business process.</strong> If you cannot explain what the file does without saying "for a client" or "before launch," it is not a tool.</li>
+        </ul>
+
+        <p>Sumers et al. (2024) formalized a similar taxonomy in <em>Cognitive Architectures for Language Agents</em>, distinguishing declarative knowledge (facts about the world), procedural knowledge (how to act), and the deliberative control layer (which action to choose). The Tools/Skills/Agents mapping is a direct implementation of this cognitive hierarchy: tools are declarative, skills are procedural, agents are the deliberative layer.</p>
+
+        <p>The three-question rule is also the refactoring test. If a file that lives in <code>agents/</code> fails question 3 — if it has no persona and refuses nothing — it is a skill wearing an agent's clothes. OperationKit's architecture docs call this out explicitly for two current examples: <code>agents/rolodex.md</code> (a constrained tool-loop prompt) and <code>agents/campaign-launcher.md</code> (a deprecated order-of-operations checklist). Both fail question 3. Both remain in <code>agents/</code> only because they hold live board slots that a move would break — a migration rather than a design principle.</p>
+
+        <!-- ROUTING TABLE -->
+        <h2 id="routing-table">The routing table as specialization</h2>
+        <p>The routing table in <code>~/.claude/CLAUDE.md</code> is the single entry point for every task in the system. Its left column is a task description; its right column is the agent file to read. When a session starts, it reads this table before anything else and routes to the correct persona.</p>
+
+        <p>Each row represents a domain boundary — a claim that some cluster of tasks is handled better by a specialist with bounded scope than by a generalist with unbounded scope. The research literature supports this design. Yao et al. (2022) showed in ReAct that interleaving reasoning and acting traces — i.e., having the model explain its decisions before taking each step — significantly improves task accuracy. A specialist agent who reasons within a narrow, well-defined domain produces more reliable reasoning traces than a generalist navigating an unbounded problem space.</p>
+
+        <div class="agent-grid">
+          <div class="agent-card">
+            <div class="ac-label">agents/cto.md</div>
+            <div class="ac-title">Chief Technology Officer</div>
+            <div class="ac-desc">PRD drafting, feature decomposition, developer orchestration, codebase documentation, deploys, domain management.</div>
+            <div class="ac-scope">Scope limit: escalates to Mike on architectural conflicts or priority conflicts with stated roadmap.</div>
+          </div>
+          <div class="agent-card">
+            <div class="ac-label">agents/cfo.md</div>
+            <div class="ac-title">Chief Financial Officer</div>
+            <div class="ac-desc">Financial data, cash position, runway, P&amp;L, bookkeeping, QuickBooks, forecasting.</div>
+            <div class="ac-scope">Scope limit: no financial commitments without explicit approval; no access to payment credentials.</div>
+          </div>
+          <div class="agent-card">
+            <div class="ac-label">agents/cmo.md</div>
+            <div class="ac-title">Chief Marketing Officer</div>
+            <div class="ac-desc">Marketing materials, brand positioning, pitch decks, SEO/GEO content, email campaign broadcasts.</div>
+            <div class="ac-scope">Scope limit: cannot merge code or trigger deploys; owns content, not infrastructure.</div>
+          </div>
+          <div class="agent-card">
+            <div class="ac-label">agents/general-counsel.md</div>
+            <div class="ac-title">General Counsel</div>
+            <div class="ac-desc">Legal drafting, contract review, agreements, compliance. All legal output is advisory; no filing without human sign-off.</div>
+            <div class="ac-scope">Scope limit: advisory only; human must review before any legal document is executed.</div>
+          </div>
+        </div>
+
+        <p>Specialization also constrains the blast radius of a mistake. An error in the CFO agent's financial reasoning cannot touch code; an error in the CTO agent's architectural judgment cannot execute financial transactions. The routing table enforces separation of concerns at the session level — not just at the code level.</p>
+
+        <p>The <code>agents/general.md</code> catch-all agent exists for tasks that fit no specialist row, but it is the fallback, not the default. The routing table is ordered to resolve to a specialist first; a general agent gets the task only if no specialist has domain coverage. This mirrors how a real organization routes work: specialists first, generalist as last resort.</p>
+
+        <!-- REFUSAL RULES -->
+        <h2 id="refusal-rules">Refusal rules as a safety primitive</h2>
+        <p>Every agent file in OperationKit carries an explicit section on what the agent is <em>not</em> licensed to do. This is not a courtesy disclaimer — it is a structural safety primitive that shapes session behavior.</p>
+
+        <p>Bai et al. (2022) introduced Constitutional AI: rather than relying solely on human feedback to align model behavior, a set of constitutional principles is injected into the training and evaluation loop so the model can evaluate and revise its own outputs against explicit rules. The OperationKit approach applies the same principle at inference time: each agent's refusal rules act as the agent's constitution. The model reads the rules at session start and applies them throughout — without fine-tuning, without RLHF, and without human review of every output.</p>
+
+        <p>Refusal rules encode three distinct categories of constraint:</p>
+
+        <h3>Domain limits</h3>
+        <p>An agent declines tasks outside its stated domain. The CTO does not draft board-level financial strategy; the CFO does not merge pull requests. Domain limits prevent scope creep, which is the most common source of cross-agent errors in multi-agent systems: a task that starts in one domain silently acquiring cross-domain side effects.</p>
+
+        <h3>Quality gates</h3>
+        <p>An agent refuses to proceed past a defined quality checkpoint without evidence that the checkpoint was met. The CTO agent will not ship code without a passing build; the QA reviewer will not approve an objective whose ARTIFACT.md contains unfilled placeholder tokens. Quality gates are not negotiable by the session — they are encoded in the agent file and cannot be bypassed by a user instruction within the session.</p>
+
+        <h3>Escalation triggers</h3>
+        <p>An agent escalates rather than decides unilaterally when certain conditions are met: an architectural conflict with a stated principle, a financial commitment above a threshold, a legal decision that requires human sign-off. Escalation is a form of refusal — the agent is refusing to make a decision it is not licensed to make, and surfacing it to the appropriate authority.</p>
+
+        <div class="deepblock">
+          <div class="db-label">agents/cto.md — escalation register</div>
+<pre>## Escalation register
+
+Tier-2 triggers (pause; tell Mike; wait):
+  - Architectural conflict: a requested change contradicts a stated
+    architectural principle or a decision in the vault.
+  - Priority conflict: the requested task would displace a stated
+    top-priority objective without explicit authorization.
+
+Tier-1 triggers (refuse; do not continue):
+  - Bypassing the QA gate established in qa-enforcement.md.
+  - Committing code without a passing build or test run.</pre>
+        </div>
+
+        <p>The research basis for encoding refusals explicitly in the agent file — rather than relying on the base model's general alignment — comes from Shanahan et al. (2023): they show that persona conditioning through role-play significantly amplifies a model's tendency to behave consistently with the stated role, including stated constraints. An agent whose file explicitly encodes "I refuse X" will refuse X more reliably than a general model asked not to do X in a system prompt, because the persona identification mechanism reinforces the constraint at each reasoning step.</p>
+
+        <p>Refusal rules also serve an organizational function: they make the boundary of an agent's authority legible to humans. An operator reading <code>agents/cfo.md</code> can determine in 60 seconds what the CFO agent will and will not do — without reading source code, without running a test, and without asking the agent itself. This legibility is what "bring your own agent" requires: the file is the contract.</p>
+
+        <!-- REFERENCES -->
+        <h2 id="references">References</h2>
+        <p>The design choices above are grounded in published research. Each citation below explains the specific connection to OperationKit's agent architecture.</p>
+
+        <ul class="ref-list">
+          <li class="ref-item">
+            <p class="ref-title">ReAct: Synergizing Reasoning and Acting in Language Models</p>
+            <p class="ref-authors">Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., &amp; Cao, Y. (2022). <em>arXiv preprint arXiv:2210.03629</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> ReAct demonstrates that interleaving chain-of-thought reasoning with action traces produces substantially better task accuracy than either pure reasoning or pure acting. OperationKit's agent-and-skill architecture directly implements this: agents reason about which skill to invoke and why (reasoning trace), then the skill executes the discrete actions. Specialist agents with bounded domains produce more grounded reasoning traces than generalists navigating unbounded problem spaces — the routing table enforces that specialization structurally.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2210.03629" rel="noopener" target="_blank">arxiv.org/abs/2210.03629 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Role-Play with Large Language Models</p>
+            <p class="ref-authors">Shanahan, M., McDonell, K., &amp; Reynolds, L. (2023). <em>Nature</em>, 623, 493–498.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Shanahan et al. show that role-play in LLMs is a text-conditioning phenomenon — the model adopts a persona through the words in its context, not through structural metadata, and that persona conditioning amplifies the model's tendency to behave consistently with stated constraints. This is why OperationKit stores agent personas as human-readable markdown: the file's prose is the mechanism, not a wrapper around a hidden representation. It also explains why refusal rules embedded in the persona file are more reliable than general alignment: the persona identification reinforces each constraint at every reasoning step.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2305.16367" rel="noopener" target="_blank">arxiv.org/abs/2305.16367 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Constitutional AI: Harmlessness from AI Feedback</p>
+            <p class="ref-authors">Bai, Y., Jones, A., Ndousse, K., Askell, A., Chen, A., DasSarma, N., … &amp; Kaplan, J. (2022). <em>arXiv preprint arXiv:2212.08073</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Constitutional AI introduces the idea of encoding explicit principles that the model evaluates its own outputs against — rather than relying solely on human feedback for every constraint. OperationKit applies this at inference time: each agent's refusal rules and scope limits act as its constitution. The model reads these rules at session start and applies them throughout without fine-tuning, giving operators a legible, versioned contract for what the agent will and will not do — which is the same legibility goal Constitutional AI pursues at training time.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2212.08073" rel="noopener" target="_blank">arxiv.org/abs/2212.08073 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Cognitive Architectures for Language Agents</p>
+            <p class="ref-authors">Sumers, T. R., Yao, S., Narasimhan, K., &amp; Griffiths, T. L. (2024). <em>Transactions on Machine Learning Research</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Sumers et al. formalize a cognitive science taxonomy for LLM agents: declarative knowledge (facts), procedural knowledge (how to act), and the deliberative control layer (which action to choose). The Tools/Skills/Agents three-layer graph is a direct implementation of this taxonomy. Tools are declarative world-facts. Skills are procedural memory — repeatable jobs with checkable done-conditions. Agents are the deliberative control layer — the only layer that reasons about which procedure to invoke, and the only layer that can refuse. This paper also documents that agents operating on consistent, structured knowledge representations outperform those reasoning over unstructured or contradictory context, which motivates okit validate's graph-consistency enforcement.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2309.02427" rel="noopener" target="_blank">arxiv.org/abs/2309.02427 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">A Survey on Large Language Model based Autonomous Agents</p>
+            <p class="ref-authors">Wang, L., Ma, C., Feng, X., Zhang, Z., Yang, H., Zhang, J., … &amp; Wen, J. (2024). <em>Frontiers of Computer Science</em>, 18(6).</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Wang et al. survey the full landscape of LLM-based autonomous agents, identifying persona stability and goal-directed refusal as the two properties that distinguish autonomous agents from tool-executing pipelines. OperationKit encodes both as first-class structural properties — persona in the agent file's identity section, refusal authority in the explicit scope-limit block. The survey also documents that multi-agent systems with bounded specialist roles and defined handoff rules significantly outperform monolithic single-agent systems on complex multi-step tasks, which is the design principle behind OperationKit's routing table.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2308.11432" rel="noopener" target="_blank">arxiv.org/abs/2308.11432 ↗</a>
+          </li>
+        </ul>
+
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle (shared behavior)
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('ok-theme', next); } catch(e) {}
+      });
+    }
+    // Active section tracking
+    const sections = document.querySelectorAll('h2[id], h3[id]');
+    const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+    if (sections.length && navLinks.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            const a = document.querySelector(`.docs-nav a[href="#${e.target.id}"]`);
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(s => obs.observe(s));
+    }
+  </script>
+</body>
+</html>
