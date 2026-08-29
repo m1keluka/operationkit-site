@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Context &amp; knowledge management — OperationKit</title>
+  <meta name="description" content="How OperationKit assembles agent context: a four-tier instruction stack, deterministic knowledge injection, objective memory, and a vault that acts as long-term storage. Design rationale with academic citations." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── docs-specific layout (shared with docs/index.html) ──────── */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+
+    /* ── page-specific ─────────────────────────────────────────── */
+    .tier-stack{display:flex;flex-direction:column;gap:0;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+    .tier{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .tier:last-child{border-bottom:none}
+    .tier-n{font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:var(--accent)}
+    .tier-label{font-weight:600;color:var(--ink);font-size:.97rem}
+    .tier-desc{font-size:.87rem;color:var(--text);margin-top:2px}
+    .tier-path{font-family:var(--font-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+    .ref-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+    .ref-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .ref-item .ref-title{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 3px}
+    .ref-item .ref-authors{font-size:.87rem;color:var(--muted);margin:0 0 6px}
+    .ref-item .ref-why{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+    .ref-item .ref-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:.8rem}
+
+    .memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 20px}
+    @media(max-width:600px){.memory-grid{grid-template-columns:1fr}}
+    .mem-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .mem-card .mem-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+    .mem-card .mem-title{font-weight:600;color:var(--ink);font-size:1rem;margin:0 0 4px}
+    .mem-card .mem-desc{font-size:.87rem;color:var(--text);margin:0;line-height:1.5}
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="../../" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="../../#board">Board</a>
+        <a class="navlink" href="../../#agents">Agents</a>
+        <a class="navlink" href="../../#quickstart">Quickstart</a>
+        <a class="navlink" href="../" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- ── SIDEBAR NAV ── -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="../">Setup guide</a></li>
+          <li><div class="nav-label">Architecture</div></li>
+          <li><a href="./" class="active">Context management</a></li>
+          <li><div class="nav-label">On this page</div></li>
+          <li><a href="#the-problem">The problem</a></li>
+          <li><a href="#four-tiers">Four-tier instruction stack</a></li>
+          <li><a href="#memory-model">Memory model</a></li>
+          <li><a href="#deterministic-vs-rag">Deterministic vs RAG</a></li>
+          <li><a href="#graph-consistency">Graph consistency</a></li>
+          <li><a href="#reviewer-loop">Reviewer loop</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+
+      <!-- ── MAIN CONTENT ── -->
+      <article class="docs-content">
+
+        <p class="eyebrow">Architecture</p>
+        <h1>Context &amp; knowledge management</h1>
+        <p class="lead" style="margin-bottom:32px">How OperationKit decides what goes in the context window — and why that decision is the primary quality lever in a long-running agent system.</p>
+
+        <!-- THE PROBLEM -->
+        <h2 id="the-problem">The problem with naive context</h2>
+        <p>Every agent system eventually faces the same question: the model has a finite context window, the relevant knowledge is not finite, and blindly concatenating everything produces worse results than carefully selecting a subset.</p>
+        <p>This is not a conjecture. Liu et al. (2023) measured it directly: when relevant information is placed in the middle of a long context, model performance degrades substantially compared to placing it at the beginning or end — a finding they call the <strong>"lost in the middle"</strong> phenomenon. The implication is that more context is not always better context, and position within the window matters as much as presence.</p>
+        <p>OperationKit's context system is built around three principles that follow from this:</p>
+        <ol>
+          <li><strong>Signal before noise.</strong> High-confidence context (the agent's own identity, the workspace's business rules) loads before lower-confidence context (retrieved KB snippets). The model sees the most important framing first.</li>
+          <li><strong>Curation over recall.</strong> Every context tier is authored and validated by a human or by an enforced schema — not scraped by a similarity search that can silently return irrelevant results.</li>
+          <li><strong>Separation of memory types.</strong> Working memory (the current objective), long-term memory (the vault), and procedural memory (skills) are stored and retrieved differently, matching what cognitive science tells us about human memory architecture.</li>
+        </ol>
+
+        <!-- FOUR TIERS -->
+        <h2 id="four-tiers">Four-tier instruction stack</h2>
+        <p>When OperationKit spawns a session, it assembles a context from four tiers loaded in order, each narrowing the agent's frame of reference. Tiers load from most-general to most-specific so that a later tier can override a general rule without conflict.</p>
+
+        <div class="tier-stack">
+          <div class="tier">
+            <span class="tier-n">T1</span>
+            <div>
+              <div class="tier-label">Global instructions</div>
+              <div class="tier-desc">Agent routing rules, tool layer pointers, identity conventions, platform-wide operating principles. Authoritative for all agents across all workspaces.</div>
+            </div>
+            <code class="tier-path">~/.claude/CLAUDE.md</code>
+          </div>
+          <div class="tier">
+            <span class="tier-n">T2</span>
+            <div>
+              <div class="tier-label">Agent persona</div>
+              <div class="tier-desc">Role definition, skills loaded by default, escalation rules, refusal conditions. Defines what this agent is allowed and expected to do.</div>
+            </div>
+            <code class="tier-path">agents/&lt;name&gt;.md</code>
+          </div>
+          <div class="tier">
+            <span class="tier-n">T3</span>
+            <div>
+              <div class="tier-label">Workspace overlay</div>
+              <div class="tier-desc">Business context specific to this workspace — active projects, conventions, known integrations, stack choices. Loaded once per workspace; changes with company decisions, not with each task.</div>
+            </div>
+            <code class="tier-path">workspaces/&lt;ws&gt;/context.md</code>
+          </div>
+          <div class="tier">
+            <span class="tier-n">T4</span>
+            <div>
+              <div class="tier-label">User overlay</div>
+              <div class="tier-desc">Tone, defaults, owned areas, escalation triggers specific to the person this session is running for. Enables the same agent to behave differently for a technical founder vs a non-technical operator.</div>
+            </div>
+            <code class="tier-path">users/&lt;id&gt;/profile.md</code>
+          </div>
+        </div>
+
+        <p>Beneath the four tiers, dynamic context is injected at session spawn:</p>
+        <ul>
+          <li><strong>Objective memory</strong> — the persistent <code>NOTES.md</code> from prior sessions on this same task.</li>
+          <li><strong>Vault KB hits</strong> — semantically relevant decisions, research, and patterns retrieved from the knowledge base.</li>
+          <li><strong>Recurring failure modes</strong> — platform-wide gotchas extracted from reviewer verdicts over the prior 90 days.</li>
+          <li><strong>Recently modified files</strong> — files changed by other sessions in the last 72 hours, preventing collisions on shared work.</li>
+        </ul>
+
+        <p>The ordering is deliberate. Stable, high-confidence context (T1–T4) comes before retrieved, potentially stale context (KB hits, failure modes). This front-loads the signal and reduces the chance that a retrieved snippet contradicts a stable instruction at a position the model will attend to less carefully.</p>
+
+        <!-- MEMORY MODEL -->
+        <h2 id="memory-model">Memory model</h2>
+        <p>Park et al. (2023) identified three memory stores in their <em>Generative Agents</em> architecture: in-context (what the agent can see right now), external (a queryable store), and parametric (baked into the model weights). OperationKit maps all three explicitly:</p>
+
+        <div class="memory-grid">
+          <div class="mem-card">
+            <div class="mem-label">Working memory</div>
+            <div class="mem-title">Objective memory</div>
+            <div class="mem-desc">Persisted across sessions for a single task. <code>NOTES.md</code> is the agent's scratch pad; <code>ARTIFACT.md</code> is the deliverable record. Both survive backend restarts and are injected into the next session's context automatically.</div>
+          </div>
+          <div class="mem-card">
+            <div class="mem-label">Long-term memory</div>
+            <div class="mem-title">The vault</div>
+            <div class="mem-desc">A structured knowledge base organized by workspace: decisions, insights, research, PRDs, architecture docs. Queryable by agent sessions. Decisions carry an <code>objective:</code> field that ties them back to the board, creating a bidirectional audit trail between what was decided and what produced it.</div>
+          </div>
+          <div class="mem-card">
+            <div class="mem-label">Procedural memory</div>
+            <div class="mem-title">Skills layer</div>
+            <div class="mem-desc">How-to knowledge encoded as <code>SKILL.md</code> files — repeatable procedures with declared tool dependencies and checkable done-conditions. Skills are loaded by agents, not by retrieval; they are explicit, not inferred.</div>
+          </div>
+          <div class="mem-card">
+            <div class="mem-label">Semantic memory</div>
+            <div class="mem-title">Tools layer</div>
+            <div class="mem-desc">Facts about the world — API endpoints, credential references, known failure modes for specific integrations. <code>TOOL.md</code> files are vendor-scoped and rewritten when the vendor changes, not when the business process changes.</div>
+          </div>
+        </div>
+
+        <p>Packer et al. (2023) showed in <em>MemGPT</em> that treating the context window like an OS's working memory — and paging knowledge in and out from external storage — can give an LLM effectively unbounded recall without degrading performance by flooding the window. OperationKit implements a simpler version of this: the vault acts as the backing store, and the session-manager decides what pages in (KB hits, objective memory) and what stays on disk (the full decision history).</p>
+
+        <!-- DETERMINISTIC VS RAG -->
+        <h2 id="deterministic-vs-rag">Deterministic assembly vs retrieval-augmented generation</h2>
+        <p>Retrieval-Augmented Generation (Lewis et al., 2020) is the dominant approach to grounding language models in external knowledge: run a similarity search over a document store, take the top-k results, and prepend them to the prompt. This is powerful for open-domain question answering where the relevant documents can be identified by semantic proximity to the query.</p>
+        <p>OperationKit uses a <strong>deterministic assembly model</strong> for its primary context tiers, and targeted retrieval only for the dynamic KB injection. The distinction matters:</p>
+
+        <table>
+          <thead>
+            <tr><th>Property</th><th>Pure RAG</th><th>OperationKit deterministic assembly</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Selection mechanism</td>
+              <td>Cosine similarity to the query</td>
+              <td>Declared edges in YAML frontmatter, validated by <code>okit validate</code></td>
+            </tr>
+            <tr>
+              <td>Failure mode</td>
+              <td>Silent relevance drift; a topically close but contextually wrong document outranks the right one</td>
+              <td>Dangling edge is a hard validation failure; nothing silent</td>
+            </tr>
+            <tr>
+              <td>Freshness</td>
+              <td>Depends on re-indexing cadence</td>
+              <td>File is the source; no index to desync</td>
+            </tr>
+            <tr>
+              <td>Scope</td>
+              <td>Works well for large, heterogeneous corpora</td>
+              <td>Works well for curated, workspace-scoped knowledge</td>
+            </tr>
+            <tr>
+              <td>Explainability</td>
+              <td>Hard to audit why a document was retrieved</td>
+              <td>Every context item has a declared reason for being there</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>The tradeoff is recall vs precision. Pure RAG recovers more knowledge from a large corpus; deterministic assembly delivers more reliable signal from a curated one. OperationKit bets on curation: the skills graph and workspace contexts are authored artifacts that agents and humans maintain, which is more expensive to write but produces fewer hallucinations about what tools and procedures are actually available.</p>
+        <p>The KB hits injected from the vault (the dynamic layer below T4) are the one place where retrieval runs — but they land after the stable tiers, so a misretrieved snippet cannot override a validated instruction.</p>
+
+        <!-- GRAPH CONSISTENCY -->
+        <h2 id="graph-consistency">Graph consistency and knowledge validity</h2>
+        <p>One underappreciated failure mode in agent systems is the agent confidently referencing a tool, skill, or procedure that doesn't exist or has changed. The context window makes the model's behavior consistent with what's in context — so if the context contains a stale reference, the agent will act on it.</p>
+        <p>OperationKit addresses this with <code>okit validate</code>, a CLI tool that traverses the full Tools → Skills → Agents dependency graph and fails hard on any dangling edge: a skill that declares a tool not in <code>tools/registry.json</code>, an agent that loads a skill that doesn't exist on disk, or a sub-skill whose parent doesn't declare it. Orphans (tools no skill uses, skills no agent loads) are recorded but not failed — they may be available for future use.</p>
+        <p>The analogy is a type system for knowledge. Just as a TypeScript compiler catches a reference to an undefined function before the code runs, <code>okit validate</code> catches a reference to an undefined capability before the agent session starts. The graph check runs in CI on every commit that touches <code>agents/</code>, <code>skills/</code>, or <code>tools/</code>.</p>
+        <p>This connects to a finding from Sumers et al. (2024) in <em>Cognitive Architectures for Language Agents</em>: agents that operate on a consistent, structured knowledge representation outperform those that reason over unstructured or contradictory context. The graph enforces that consistency automatically.</p>
+
+        <!-- REVIEWER LOOP -->
+        <h2 id="reviewer-loop">The reviewer loop as verbal reinforcement</h2>
+        <p>Context management is not only about what goes into the window at the start of a session. It's also about what feedback comes back after a session completes, and how that feedback shapes the next session's context.</p>
+        <p>Shinn et al. (2023) introduced <em>Reflexion</em>: rather than using gradient descent to update model weights from feedback, agents evaluate their own outputs in natural language and store that evaluation in an "episodic memory buffer" — which is then prepended to the next attempt. This produces dramatic improvements on coding and decision-making benchmarks without any fine-tuning.</p>
+        <p>OperationKit implements a structural version of this. When a working session completes, an autonomous <strong>reviewer session</strong> runs independently and grades the output. A <code>fail</code> verdict reverts the objective to <code>working</code> and prepends the reviewer's findings to the next session's context. A <code>pass</code> advances to the human review gate.</p>
+        <p>The critical property is that the reviewer's findings become part of the next session's context automatically — the session-manager injects them. The agent doesn't need to remember its own failure; the harness guarantees the failure is visible. This avoids the common failure mode where a retry session has no knowledge of what went wrong in the prior attempt and repeats the same mistake.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>The reviewer is an independent Claude session, not a self-evaluation by the working agent. This matters: a model evaluating its own output is susceptible to the same blind spots that produced the error. An independent session with a fresh context is more likely to catch errors the working session normalized.</p>
+        </div>
+
+        <!-- REFERENCES -->
+        <h2 id="references">References</h2>
+        <p>The engineering decisions above are grounded in published research. The citations below point to the specific papers that informed each design choice.</p>
+
+        <ul class="ref-list">
+          <li class="ref-item">
+            <p class="ref-title">Lost in the Middle: How Language Models Use Long Contexts</p>
+            <p class="ref-authors">Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., &amp; Liang, P. (2023). <em>Transactions of the Association for Computational Linguistics</em>, 12, 157–173.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Directly motivates front-loading high-confidence tiers (T1–T4) before retrieved context. Documents the "lost in the middle" degradation that makes position-aware context ordering — not just content selection — a first-class concern.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2307.03172" rel="noopener" target="_blank">arxiv.org/abs/2307.03172 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Generative Agents: Interactive Simulacra of Human Behavior</p>
+            <p class="ref-authors">Park, J. S., O'Brien, J. C., Cai, C. J., Morris, M. R., Liang, P., &amp; Bernstein, M. S. (2023). <em>Proceedings of UIST 2023</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Source of the three-memory taxonomy (in-context, external, parametric) that OperationKit maps to objective memory, vault, and skills. Also introduces recency × importance × relevance as retrieval signals — a framework the vault's KB search partially implements.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2304.03442" rel="noopener" target="_blank">arxiv.org/abs/2304.03442 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">MemGPT: Towards LLMs as Operating Systems</p>
+            <p class="ref-authors">Packer, C., Fang, V., Patil, S. G., Moon, K., Zhong, R., &amp; Gonzalez, J. E. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Establishes the analogy between OS virtual memory and context management: the context window is working memory; external storage pages in and out. OperationKit's split between the objective-memory scratchpad (hot) and the vault (cold) follows this paging model.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2310.08560" rel="noopener" target="_blank">arxiv.org/abs/2310.08560 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</p>
+            <p class="ref-authors">Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., … &amp; Kiela, D. (2020). <em>Advances in Neural Information Processing Systems</em>, 33, 9459–9474.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> The foundational RAG paper — the baseline that OperationKit's deterministic assembly explicitly contrasts with. Understanding where RAG excels (large heterogeneous corpora, open-domain recall) clarifies why a curated graph approach is preferable for workspace-scoped procedural knowledge.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2005.11401" rel="noopener" target="_blank">arxiv.org/abs/2005.11401 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Reflexion: Language Agents with Verbal Reinforcement Learning</p>
+            <p class="ref-authors">Shinn, N., Cassano, F., Berman, E., Gopinath, A., Narasimhan, K., &amp; Yao, S. (2023). <em>Advances in Neural Information Processing Systems</em>, 36.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Demonstrates that injecting a natural-language critique of a prior attempt into the next session's context outperforms naive retry without any weight updates. Directly informs OperationKit's reviewer loop: reviewer findings are prepended to the working session's next spawn context.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2303.11366" rel="noopener" target="_blank">arxiv.org/abs/2303.11366 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Cognitive Architectures for Language Agents</p>
+            <p class="ref-authors">Sumers, T. R., Yao, S., Narasimhan, K., &amp; Griffiths, T. L. (2024). <em>Transactions on Machine Learning Research</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Maps agent architectures onto cognitive science frameworks — distinguishing in-context vs external vs parametric storage, procedural vs declarative knowledge, and reactive vs deliberative control. The Tools/Skills/Agents three-layer graph maps onto this taxonomy: tools are declarative facts, skills are procedural memory, agents are the deliberative control layer.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2309.02427" rel="noopener" target="_blank">arxiv.org/abs/2309.02427 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">A Survey on Large Language Model based Autonomous Agents</p>
+            <p class="ref-authors">Wang, L., Ma, C., Feng, X., Zhang, Z., Yang, H., Zhang, J., … &amp; Wen, J. (2024). <em>Frontiers of Computer Science</em>, 18(6).</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Comprehensive survey of memory, planning, and action in LLM agents. Validates OperationKit's multi-tier memory design and documents evidence that agents with persistent external memory consistently outperform stateless agents on multi-step tasks — the primary motivation for the vault and objective-memory system.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2308.11432" rel="noopener" target="_blank">arxiv.org/abs/2308.11432 ↗</a>
+          </li>
+        </ul>
+
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle (shared behavior)
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('ok-theme', next); } catch(e) {}
+      });
+    }
+    // Active section tracking
+    const sections = document.querySelectorAll('h2[id], h3[id]');
+    const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+    if (sections.length && navLinks.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            const a = document.querySelector(`.docs-nav a[href="#${e.target.id}"]`);
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(s => obs.observe(s));
+    }
+  </script>
+</body>
+</html>
