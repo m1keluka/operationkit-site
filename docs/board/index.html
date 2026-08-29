@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The board &amp; objective state machine — OperationKit</title>
+  <meta name="description" content="How OperationKit's board works: objectives as atomic units, the planning-to-done state machine, the autonomous reviewer, WIP limits, and the delegator pattern." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── docs-specific layout (shared with docs/index.html) ──────── */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+
+    /* ── page-specific ─────────────────────────────────────────── */
+    .ref-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+    .ref-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .ref-item .ref-title{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 3px}
+    .ref-item .ref-authors{font-size:.87rem;color:var(--muted);margin:0 0 6px}
+    .ref-item .ref-why{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+    .ref-item .ref-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:.8rem}
+
+    /* state machine diagram */
+    .state-flow{display:flex;flex-direction:column;gap:0;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+    .state-row{display:grid;grid-template-columns:130px 1fr;align-items:stretch;border-bottom:1px solid var(--border)}
+    .state-row:last-child{border-bottom:none}
+    .state-badge{display:flex;align-items:center;justify-content:center;padding:14px 12px;background:var(--surface);font-family:var(--font-mono);font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-right:1px solid var(--border)}
+    .state-badge.s-plan{color:#7c6fcd}
+    .state-badge.s-queue{color:var(--muted)}
+    .state-badge.s-work{color:#2a9d8f}
+    .state-badge.s-airev{color:#e9c46a}
+    .state-badge.s-hrev{color:#f4a261}
+    .state-badge.s-done{color:var(--accent)}
+    .state-detail{padding:14px 16px}
+    .state-detail .sd-title{font-weight:600;color:var(--ink);font-size:.93rem;margin:0 0 3px}
+    .state-detail .sd-desc{font-size:.87rem;color:var(--text);margin:0;line-height:1.5}
+
+    .type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 20px}
+    @media(max-width:560px){.type-grid{grid-template-columns:1fr}}
+    .type-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px}
+    .type-card .tc-label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+    .type-card .tc-name{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 4px}
+    .type-card .tc-desc{font-size:.85rem;color:var(--text);margin:0;line-height:1.45}
+
+    .wip-meter{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px}
+    .wip-bar{flex:1;height:10px;background:var(--border);border-radius:100px;overflow:hidden}
+    .wip-fill{height:100%;width:60%;background:var(--accent);border-radius:100px}
+    .wip-label{font-family:var(--font-mono);font-size:.8rem;color:var(--muted);white-space:nowrap}
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="../../" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="../../#board">Board</a>
+        <a class="navlink" href="../../#agents">Agents</a>
+        <a class="navlink" href="../../#quickstart">Quickstart</a>
+        <a class="navlink" href="../" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- ── SIDEBAR NAV ── -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="../">Setup guide</a></li>
+          <li><div class="nav-label">Architecture</div></li>
+          <li><a href="../context/">Context management</a></li>
+          <li><a href="../sessions/">Session management</a></li>
+          <li><a href="../agents/">Agent architecture</a></li>
+          <li><a href="./" class="active">The board</a></li>
+          <li><div class="nav-label">On this page</div></li>
+          <li><a href="#atomic-unit">Objective as atomic unit</a></li>
+          <li><a href="#state-machine">State machine</a></li>
+          <li><a href="#reviewer">Autonomous reviewer</a></li>
+          <li><a href="#wip">WIP limiting</a></li>
+          <li><a href="#delegator">Delegator pattern</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+
+      <!-- ── MAIN CONTENT ── -->
+      <article class="docs-content">
+
+        <p class="eyebrow">Architecture</p>
+        <h1>The board &amp; objective state machine</h1>
+        <p class="lead" style="margin-bottom:32px">How OperationKit turns a card on a board into a verified, auditable piece of work — and why the state machine is the key to making that reliable.</p>
+
+        <!-- ATOMIC UNIT -->
+        <h2 id="atomic-unit">The objective as atomic unit</h2>
+        <p>Every piece of work in OperationKit is an <strong>objective</strong>: a single SQLite row, a card on the board, and — while it runs — a tmux session with a live agent terminal. These three representations are the same object. The card moves because the row changes state; the terminal exists because the row is in <code>working</code>; the row gains evidence because the terminal produced output.</p>
+        <p>This three-way correspondence is intentional. It gives you one place to look for the status of any piece of work (the board), one place for the agent to write evidence (the filesystem), and one place for the orchestrator to make routing decisions (the database). Splitting these into separate systems — a project tracker here, a job queue there, a log aggregator somewhere else — creates a synchronization problem that becomes a trust problem: you can never be sure the card reflects what the agent actually did.</p>
+
+        <h3>Three objective types</h3>
+        <p>Not all work needs the same review overhead. OperationKit defines three types, each with a different path through the state machine:</p>
+
+        <div class="type-grid">
+          <div class="type-card">
+            <div class="tc-label">Type</div>
+            <div class="tc-name">project</div>
+            <div class="tc-desc">Full pipeline. Passes through AI review, then waits for human sign-off before closing. For substantial work with visible risk.</div>
+          </div>
+          <div class="type-card">
+            <div class="tc-label">Type</div>
+            <div class="tc-name">bug</div>
+            <div class="tc-desc">Skips human review. AI review is sufficient for targeted fixes with a narrow blast radius.</div>
+          </div>
+          <div class="type-card">
+            <div class="tc-label">Type</div>
+            <div class="tc-name">task</div>
+            <div class="tc-desc">Skips both review stages. For mechanical, low-stakes work — data exports, configuration updates, one-off scripts.</div>
+          </div>
+        </div>
+
+        <p>The type is set when the objective is created and doesn't change. This means the review overhead is a deliberate decision made at intake, not something that slips through accidentally. A bug that accidentally ships as a <code>project</code> gets more review than necessary; a project that ships as a <code>task</code> bypasses a safety gate. Getting the type right matters.</p>
+
+        <h3>Why a state machine</h3>
+        <p>The core alternative to a state machine is a list of steps a human or agent follows — a checklist, a runbook, a prompt. Checklists are useful but not enforced: an agent can skip a step, a human can approve without reading, and nothing in the system prevents the next step from running before the prior one is verified.</p>
+        <p>A state machine makes entry and exit conditions explicit and enforced. <strong>An objective in <code>ai_review</code> cannot skip to <code>done</code></strong> without a reviewer session producing a <code>pass</code> verdict and the state-poller recording the transition. The transition is auditable: the row's state history, the reviewer's <code>ARTIFACT.md</code>, and the timestamp are all in the database. If something goes wrong, there is a complete record of what state the objective was in at each point in time.</p>
+        <p>Yao et al.'s <em>Tree of Thoughts</em> (2023) showed that decomposing a problem into discrete, evaluable intermediate states dramatically improves reliability on complex tasks. The insight generalizes beyond single-model reasoning: at the system level, decomposing work into states with explicit evaluation criteria is what separates a reproducible engineering process from one that works sometimes. The state machine is OperationKit's implementation of that insight at the board level.</p>
+
+        <!-- STATE MACHINE -->
+        <h2 id="state-machine">State machine</h2>
+        <p>An objective transitions through six states. The transitions are driven by the state-poller, a server-side process that watches for terminal-session exit events and fires the appropriate state change. No transition requires human intervention except the <code>human_review → done</code> gate on <code>project</code>-type objectives.</p>
+
+        <div class="state-flow">
+          <div class="state-row">
+            <div class="state-badge s-plan">planning</div>
+            <div class="state-detail">
+              <div class="sd-title">Decomposition &amp; context assembly</div>
+              <div class="sd-desc">A planning session runs. The agent reads the objective brief, loads workspace context, assembles a plan, and writes it to <code>NOTES.md</code>. Exits to <code>queue</code> when the session completes successfully.</div>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-badge s-queue">queue</div>
+            <div class="state-detail">
+              <div class="sd-title">Waiting for a session slot</div>
+              <div class="sd-desc">The objective is ready to run but the system is at its WIP limit. No agent is consuming resources. Transitions to <code>working</code> as soon as a slot opens.</div>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-badge s-work">working</div>
+            <div class="state-detail">
+              <div class="sd-title">Active agent session</div>
+              <div class="sd-desc">A working session is live. The agent executes, writes evidence to <code>ARTIFACT.md</code>, and commits any code changes. Exits to <code>ai_review</code> (project/bug) or <code>done</code> (task) when the session completes.</div>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-badge s-airev">ai_review</div>
+            <div class="state-detail">
+              <div class="sd-title">Autonomous reviewer session</div>
+              <div class="sd-desc">An independent reviewer session grades the deliverable. <strong>Pass</strong>: advances to <code>human_review</code> (project) or <code>done</code> (bug). <strong>Fail</strong>: reverts to <code>working</code> with reviewer findings prepended to the next session's context.</div>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-badge s-hrev">human_review</div>
+            <div class="state-detail">
+              <div class="sd-title">Human sign-off gate</div>
+              <div class="sd-desc">The card waits in the board's review column. A human reads <code>ARTIFACT.md</code>, inspects the branch or diff, and approves or rejects from the UI. Approval advances to <code>done</code>; rejection reverts to <code>working</code>.</div>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-badge s-done">done</div>
+            <div class="state-detail">
+              <div class="sd-title">Closed</div>
+              <div class="sd-desc">The objective is complete. The row is archived, the session slot is freed, and the card moves to the done column. Evidence is permanently available via the objective record.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3>The fail path</h3>
+        <p>When the autonomous reviewer returns a <code>fail</code> verdict, the state machine reverts the objective to <code>working</code> rather than closing it. This is not an error state — it's a designed iteration loop. The reviewer's findings are prepended to the next working session's context so the agent enters its retry with a concrete list of what failed, rather than repeating the original approach.</p>
+        <p>This loop is bounded: the objective tracks a retry count, and after a configurable maximum the objective surfaces for human triage rather than spinning indefinitely. The loop implements the <em>Reflexion</em> pattern (Shinn et al., 2023): verbal feedback stored as episodic context drives improvement without gradient updates. Madaan et al.'s <em>Self-Refine</em> (2023) extends this result to a broader range of generation tasks, showing that structured critique followed by targeted revision consistently outperforms single-shot generation — even when the same model produces both the output and the critique.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>The reviewer finding is injected by the harness, not by the agent. The working agent does not need to remember it — the session manager guarantees it arrives at the top of the next context window. This removes a whole class of failures where an agent "knows" it should fix something but fails to act because the prior failure is no longer salient.</p>
+        </div>
+
+        <!-- AUTONOMOUS REVIEWER -->
+        <h2 id="reviewer">The autonomous reviewer</h2>
+        <p>The reviewer is not a self-evaluation. It is a separate Claude session spawned by the state-poller after the working session exits. It has no memory of the working session's reasoning, no access to the working session's scratch notes, and no prior relationship with the task. It arrives cold and reads only what the working session chose to expose as its deliverable.</p>
+
+        <h3>The masking property</h3>
+        <p>Every objective has two files in its memory directory:</p>
+        <ul>
+          <li><code>NOTES.md</code> — the working agent's private scratch. Hypotheses, dead ends, self-narration, intermediate state. The agent writes freely here because nothing in this file is graded.</li>
+          <li><code>ARTIFACT.md</code> — the deliverable record. What was produced, where it lives (branch, file paths, PR link), and evidence for each acceptance criterion. This is the only file the reviewer reads.</li>
+        </ul>
+        <p>The reviewer is masked off <code>NOTES.md</code> by the harness. It sees <code>ARTIFACT.md</code> and the branch, nothing else from the working session. This separation is the <strong>masking property</strong>, and it exists for a specific reason: a model evaluating its own reasoning is susceptible to the same blind spots that produced any errors in that reasoning. The working agent's scratch contains its rationalization of why its approach was correct — showing that to the reviewer poisons the independence of the grade.</p>
+        <p>The masking property means the reviewer grades the deliverable, not the agent's confidence in the deliverable. These are different things. A working agent that is certain it succeeded but left placeholder text in <code>ARTIFACT.md</code> will fail review — because the evidence wasn't written, not because the underlying work wasn't done. This forces the working agent to produce legible output, not just internally coherent reasoning.</p>
+
+        <h3>Why independence matters</h3>
+        <p>Hong et al.'s <em>MetaGPT</em> (2023) showed that assigning distinct roles with structured handoffs across agent boundaries — rather than having a single agent perform all roles — substantially reduces the error rate on complex software engineering tasks. The key mechanism is that each role has a different information set and a different success criterion: the coder is not also the tester; the tester is not also the reviewer. OperationKit applies this principle at the review boundary: the working agent's success criterion is producing an output; the reviewer's success criterion is verifying that output against the acceptance criteria. The same agent cannot honestly do both at once.</p>
+
+        <!-- WIP LIMITING -->
+        <h2 id="wip">WIP limiting</h2>
+        <p>OperationKit caps concurrent working sessions at <strong>25</strong>. Objectives beyond that cap queue at the <code>queue</code> state and wait for a slot to open. This is not a resource constraint — it is a design choice, and it follows directly from Lean manufacturing and Kanban theory.</p>
+
+        <div class="wip-meter" aria-label="Example: 15 of 25 WIP slots in use">
+          <span class="wip-label">15 / 25</span>
+          <div class="wip-bar" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="25">
+            <div class="wip-fill" style="width:60%"></div>
+          </div>
+          <span class="wip-label">slots in use</span>
+        </div>
+
+        <p>Benson &amp; DeMaria Anderson's <em>Personal Kanban</em> (2011) articulates the core finding: constraining WIP is the primary lever for improving throughput and reducing lead time. The intuition is that work in progress that is not being actively progressed is not free — it holds context, creates coordination overhead, blocks downstream dependencies, and degrades the quality of attention given to each active item. A system with 100 open items and 5 workers does not deliver 20 items per worker; it delivers confused, partially-done work across all 100.</p>
+        <p>For an agent system, the cost of unbounded concurrency is more concrete:</p>
+        <ul>
+          <li><strong>Context-switch cost.</strong> Each working session holds a context window. A session that is interrupted, resumes from a stale context, or conflicts with a sibling session on shared files incurs a real error rate penalty.</li>
+          <li><strong>Coordination complexity.</strong> Two sessions editing the same file, the same branch, or the same database table produce race conditions. At low concurrency these are manageable; at high concurrency they become the dominant failure mode.</li>
+          <li><strong>Review queue depth.</strong> If working sessions outpace the reviewer's capacity to evaluate them, review becomes a bottleneck that creates false confidence — objectives accumulate in <code>ai_review</code>, pressure builds to approve them faster, and quality gates erode.</li>
+        </ul>
+        <p>The 25-session cap is not a universal optimum. It reflects the resource profile of a single-server deployment with a standard Claude subscription. You can tune it via <code>MAX_CONCURRENT_SESSIONS</code> in <code>.env</code>, but the right direction is to lower it until throughput improves — not raise it until the server struggles.</p>
+
+        <!-- DELEGATOR PATTERN -->
+        <h2 id="delegator">The delegator / strategy pattern</h2>
+        <p>Some objectives are too large for a single working session to complete from scratch. OperationKit handles this through the <strong>delegator pattern</strong>: a persistent top-level objective that does not produce a deliverable itself, but instead spawns child objectives and routes work based on what each child produces.</p>
+
+        <h3>How it works</h3>
+        <p>A delegator objective is an ordinary <code>project</code>-type objective whose working session implements an orchestration loop rather than a direct implementation task:</p>
+        <ol>
+          <li>The delegator session wakes, reads its own <code>NOTES.md</code> for state from the prior iteration, and reads the <code>ARTIFACT.md</code> of any child objectives that completed since its last wake.</li>
+          <li>It decides what to do next — spawn a new child, retry a failed child with new instructions, aggregate results, or declare the parent objective complete.</li>
+          <li>It writes its decision to <code>NOTES.md</code> and exits. The session slot is freed.</li>
+          <li>When a child objective transitions to <code>done</code>, the harness fires a <code>[child-complete]</code> event on the parent. The state-poller wakes the delegator's next session with that event in context.</li>
+        </ol>
+        <p>The delegator re-enters <code>working</code> on each <code>[child-complete]</code> event, reads the child's output, and decides the next step. This is the strategy pattern from software architecture applied to agent orchestration: the delegator holds the strategic plan; each child worker holds a specific tactic. Neither needs to know how the other works internally.</p>
+
+        <h3>Why this beats a monolithic prompt</h3>
+        <p>The alternative is a single long-running agent session that plans, decomposes, executes, and verifies all in one context window. This fails at scale for three reasons:</p>
+        <ul>
+          <li><strong>Context length.</strong> A context window that holds the plan, all intermediate outputs, and all error history quickly reaches capacity. Work done early in the session is compressed or lost by the time the agent needs to reference it.</li>
+          <li><strong>Error propagation.</strong> A mistake in step 3 of 20 may not surface until step 18. In a monolithic session, the agent must trace back through its own reasoning to identify the root cause — often with degraded context. In a delegator model, child 3 fails review, the delegator reads the finding, and spawns child 3-retry with corrected instructions.</li>
+          <li><strong>Parallelism.</strong> A delegator can spawn multiple children simultaneously, each working on an independent subtask. A monolithic session is sequential by definition.</li>
+        </ul>
+        <p>Hong et al.'s <em>MetaGPT</em> framework (2023) formalizes this intuition: structured role decomposition with explicit handoffs between agents outperforms a single capable agent on multi-step engineering tasks because it breaks the correlation between the errors — each role's failure mode is different, so they don't compound.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>A delegator objective itself consumes a WIP slot only while its working session is active — typically a few seconds to minutes per <code>[child-complete]</code> event. In practice a delegator spends most of its life in <code>queue</code> waiting for the next event, freeing its slot for child workers to use.</p>
+        </div>
+
+        <!-- REFERENCES -->
+        <h2 id="references">References</h2>
+        <p>The design decisions above are grounded in published research. The citations below point to the specific papers and books that informed each choice.</p>
+
+        <ul class="ref-list">
+          <li class="ref-item">
+            <p class="ref-title">Tree of Thoughts: Deliberate Problem Solving with Large Language Models</p>
+            <p class="ref-authors">Yao, S., Yu, D., Zhao, J., Shafran, I., Griffiths, T. L., Cao, Y., &amp; Narasimhan, K. (2023). <em>Advances in Neural Information Processing Systems</em>, 36.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Demonstrates that decomposing a problem into discrete, evaluable intermediate states dramatically improves reliability on complex tasks. Motivates OperationKit's state machine design: each state is an evaluable intermediate with explicit entry and exit conditions, not just a label on a kanban card.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2305.10601" rel="noopener" target="_blank">arxiv.org/abs/2305.10601 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Reflexion: Language Agents with Verbal Reinforcement Learning</p>
+            <p class="ref-authors">Shinn, N., Cassano, F., Berman, E., Gopinath, A., Narasimhan, K., &amp; Yao, S. (2023). <em>Advances in Neural Information Processing Systems</em>, 36.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Shows that storing a natural-language critique of a prior attempt in episodic memory and prepending it to the next attempt outperforms naive retry without any weight updates. Directly informs the fail path: reviewer findings are prepended to the working session's next context, not just logged.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2303.11366" rel="noopener" target="_blank">arxiv.org/abs/2303.11366 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Self-Refine: Iterative Refinement with Self-Feedback</p>
+            <p class="ref-authors">Madaan, A., Tandon, N., Gupta, P., Hallinan, S., Gao, L., Wiegreffe, S., … &amp; Clark, P. (2023). <em>Advances in Neural Information Processing Systems</em>, 36.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Establishes that structured critique followed by targeted revision consistently outperforms single-shot generation across a wide range of tasks. Validates the ai_review → working → ai_review loop as a design pattern with measurable quality improvement, not just organizational discipline.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2303.17651" rel="noopener" target="_blank">arxiv.org/abs/2303.17651 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">MetaGPT: Meta Programming for a Multi-Agent Collaborative Framework</p>
+            <p class="ref-authors">Hong, S., Zheng, X., Chen, J., Cheng, Y., Wang, J., Zhang, C., … &amp; Wu, C. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Shows that assigning distinct roles with structured handoffs — coder, tester, reviewer — reduces error rates on software engineering tasks by breaking the correlation between errors. Directly motivates the working/reviewer role split, the masking property, and the delegator/worker decomposition.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2308.00352" rel="noopener" target="_blank">arxiv.org/abs/2308.00352 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Personal Kanban: Mapping Work, Navigating Life</p>
+            <p class="ref-authors">Benson, J., &amp; DeMaria Anderson, T. (2011). <em>Modus Cooperandi Press</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Articulates the foundational Lean/Kanban finding that constraining WIP is the primary lever for improving throughput and reducing lead time. OperationKit's 25-session cap applies this principle directly: the right direction when throughput is low is to reduce concurrency, not increase it. Limiting WIP is not a resource constraint — it is a quality decision.</p>
+          </li>
+        </ul>
+
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle (shared behavior)
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('ok-theme', next); } catch(e) {}
+      });
+    }
+    // Active section tracking
+    const sections = document.querySelectorAll('h2[id], h3[id]');
+    const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+    if (sections.length && navLinks.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            const a = document.querySelector(`.docs-nav a[href="#${e.target.id}"]`);
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(s => obs.observe(s));
+    }
+  </script>
+</body>
+</html>
