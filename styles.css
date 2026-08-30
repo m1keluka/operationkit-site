@@ -256,9 +256,6 @@ img,svg{max-width:100%}
 .lic-k{background:var(--surface-2);color:var(--muted);padding:4px 8px}
 .lic-v{background:var(--ink);color:var(--bg);padding:4px 8px;font-weight:600}
 .prov{color:var(--muted);font-size:.82rem;max-width:52ch}
-.footer-domains{font-family:var(--font-mono);font-size:.84rem;color:var(--muted)}
-.footer-domains a{color:var(--text)}
-.footer-domains a:hover{color:var(--accent)}
 
 /* ---------- reveal ---------- */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}

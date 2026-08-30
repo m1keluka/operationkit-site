@@ -137,9 +137,8 @@
           OperationKit board. The steps match the current source tree (V1, reseeded 2026-08-28).
         </p>
         <p>
-          <strong>Early access:</strong> OperationKit V1 is in private early access. The source is
-          being prepared for a public release. If you have access to the source tree, these docs describe
-          exactly what <code>install.sh</code>, <code>docker-compose.yml</code>, and <code>.env.example</code>
+          The source is public at <a href="https://github.com/m1keluka/OperationKit" rel="noopener">github.com/m1keluka/OperationKit</a>.
+          These docs describe exactly what <code>install.sh</code>, <code>docker-compose.yml</code>, and <code>.env.example</code>
           contain today. Nothing here is invented or forward-looking.
         </p>
         <div class="note">
@@ -200,10 +199,8 @@ cd OperationKit</code></pre>
         <div class="note warn">
           <svg class="note-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <p>
-            <strong>OperationKit-dev is currently private.</strong> The public release is
-            forthcoming. Join the waitlist on
-            <a href="https://github.com/m1keluka/OperationKit" rel="noopener">github.com/m1keluka/OperationKit</a>
-            to be notified when the source goes public.
+            The source is public. Clone or star the repo at
+            <a href="https://github.com/m1keluka/OperationKit" rel="noopener">github.com/m1keluka/OperationKit</a>.
           </p>
         </div>
 
@@ -302,7 +299,7 @@ docker compose logs -f command-center</code></pre>
         <!-- HEALTH CHECK -->
         <h2 id="health">Health check</h2>
         <p>Both services expose health endpoints. Check them before moving on:</p>
-        <pre><code># Command Center app (should return HTTP 200 with {"status":"ok"}):
+        <pre><code># OperationKit app (should return HTTP 200 with {"status":"ok"}):
 curl -f http://127.0.0.1:3002/api/health
 
 # LiteLLM model proxy (loopback only — never exposed to the internet):
