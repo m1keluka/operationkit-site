@@ -309,6 +309,14 @@ img,svg{max-width:100%}
   border-radius:6px;padding:3px 9px;margin-bottom:14px}
 .roadmap .rdot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
 
+/* M36 — shipped vs roadmap: unshipped items read muted, and their tick is
+   neutralised so a checkmark never implies "this works today". */
+.feat.is-roadmap{color:var(--muted)}
+.feat.is-roadmap .tick{color:var(--muted);opacity:.45}
+.feat.is-roadmap b{color:var(--muted)}
+.capcard.is-roadmap{opacity:.72}
+.capcard.is-roadmap .ic{color:var(--muted)}
+
 /* mono "code frame" mock used inside deep blocks */
 .codeframe{background:var(--term-bg);border:1px solid var(--border-strong);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
 .cf-bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
