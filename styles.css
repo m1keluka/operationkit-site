@@ -256,9 +256,6 @@ img,svg{max-width:100%}
 .lic-k{background:var(--surface-2);color:var(--muted);padding:4px 8px}
 .lic-v{background:var(--ink);color:var(--bg);padding:4px 8px;font-weight:600}
 .prov{color:var(--muted);font-size:.82rem;max-width:52ch}
-.footer-domains{font-family:var(--font-mono);font-size:.84rem;color:var(--muted)}
-.footer-domains a{color:var(--text)}
-.footer-domains a:hover{color:var(--accent)}
 
 /* ---------- reveal ---------- */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
@@ -311,6 +308,14 @@ img,svg{max-width:100%}
   border:1px solid color-mix(in srgb,var(--amber) 42%,transparent);background:color-mix(in srgb,var(--amber) 9%,transparent);
   border-radius:6px;padding:3px 9px;margin-bottom:14px}
 .roadmap .rdot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+
+/* M36 — shipped vs roadmap: unshipped items read muted, and their tick is
+   neutralised so a checkmark never implies "this works today". */
+.feat.is-roadmap{color:var(--muted)}
+.feat.is-roadmap .tick{color:var(--muted);opacity:.45}
+.feat.is-roadmap b{color:var(--muted)}
+.capcard.is-roadmap{opacity:.72}
+.capcard.is-roadmap .ic{color:var(--muted)}
 
 /* mono "code frame" mock used inside deep blocks */
 .codeframe{background:var(--term-bg);border:1px solid var(--border-strong);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
