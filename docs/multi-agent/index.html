@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi-agent coordination — OperationKit</title>
+  <meta name="description" content="How OperationKit orchestrates multiple Claude sessions in parallel: the delegator/strategy pattern, worktree isolation, autonomous review, double-spawn failure modes, and account rotation for concurrency." />
+  <meta name="theme-color" content="#0c0f14" />
+  <script>(function(){try{if(localStorage.getItem('ok-theme')!=='light')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <link rel="icon" type="image/svg+xml" href="../../favicon-caret.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-sans-700.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/geist-mono-500.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="../../fonts/inter-400.woff2" crossorigin />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── docs-specific layout (shared with docs/index.html) ──────── */
+    .docs-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 66px);max-width:var(--maxw);margin:0 auto;padding:0 24px}
+    @media(max-width:860px){.docs-layout{grid-template-columns:1fr}}
+    .docs-nav{position:sticky;top:66px;align-self:start;height:calc(100vh - 66px);overflow-y:auto;padding:32px 0 32px 0;border-right:1px solid var(--border);margin-right:40px}
+    @media(max-width:860px){.docs-nav{position:static;border-right:none;border-bottom:1px solid var(--border);margin-right:0;padding:20px 0;height:auto}}
+    .docs-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+    .docs-nav li a{display:block;font-size:.9rem;font-family:var(--font-body);color:var(--text);padding:6px 12px;border-radius:7px;transition:background .1s,color .1s}
+    .docs-nav li a:hover{color:var(--ink);background:var(--surface-2)}
+    .docs-nav li a.active{color:var(--accent);background:var(--accent-tint);font-weight:500}
+    .docs-nav .nav-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:8px}
+    .docs-content{padding:40px 0 80px;max-width:740px}
+    .docs-content h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:8px}
+    .docs-content h2{font-size:1.5rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--border)}
+    .docs-content h3{font-size:1.15rem;margin:28px 0 8px;color:var(--ink)}
+    .docs-content p{margin:0 0 14px;line-height:1.7}
+    .docs-content ul,.docs-content ol{margin:0 0 16px;padding-left:22px;line-height:1.7}
+    .docs-content li{margin-bottom:5px}
+    .docs-content a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .docs-content a:hover{color:var(--accent-press)}
+    .docs-content strong{color:var(--ink)}
+    .docs-content table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:.93rem}
+    .docs-content th{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:2px solid var(--border)}
+    .docs-content td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .docs-content td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+    .docs-content tr:last-child td{border-bottom:none}
+    pre{background:var(--term-bg);color:var(--term-text);border-radius:var(--radius-sm);padding:18px 20px;overflow-x:auto;margin:0 0 18px;font-size:.89rem;line-height:1.55;font-family:var(--font-mono)}
+    code{font-family:var(--font-mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+    pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+    .note{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:16px 18px;margin:0 0 18px;font-size:.97rem}
+    .note.warn{border-left-color:var(--amber)}
+    .note-ico{flex:none;width:18px;height:18px;margin-top:2px}
+    .note p{margin:0;line-height:1.55}
+
+    /* ── page-specific ─────────────────────────────────────────── */
+    .ref-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+    .ref-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+    .ref-item .ref-title{font-weight:600;color:var(--ink);font-size:.97rem;margin:0 0 3px}
+    .ref-item .ref-authors{font-size:.87rem;color:var(--muted);margin:0 0 6px}
+    .ref-item .ref-why{font-size:.9rem;color:var(--text);margin:0;line-height:1.55}
+    .ref-item .ref-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:.8rem}
+
+    .deepblock{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px 22px;margin:0 0 20px}
+    .deepblock .db-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+    .deepblock .db-title{font-weight:600;color:var(--ink);font-size:1rem;margin:0 0 8px}
+    .deepblock p{font-size:.92rem;color:var(--text);margin:0;line-height:1.6}
+
+    .codeframe{background:var(--term-bg);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin:0 0 20px}
+    .codeframe-label{font-family:var(--font-mono);font-size:.73rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 16px;border-bottom:1px solid var(--border)}
+    .codeframe pre{margin:0;border:none;border-radius:0;background:transparent}
+
+    .failure-grid{display:flex;flex-direction:column;gap:10px;margin:0 0 20px}
+    .failure-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:600px){.failure-row{grid-template-columns:1fr}}
+    .failure-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px}
+    .failure-card .fc-label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin:0 0 5px}
+    .failure-card .fc-label.danger{color:#e05c5c}
+    .failure-card .fc-label.fix{color:#4caf82}
+    .failure-card .fc-title{font-weight:600;color:var(--ink);font-size:.93rem;margin:0 0 4px}
+    .failure-card p{font-size:.87rem;color:var(--text);margin:0;line-height:1.5}
+
+    .account-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:0 0 20px}
+    @media(max-width:600px){.account-grid{grid-template-columns:repeat(3,1fr)}}
+    .account-cell{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:center}
+    .account-cell .ac-name{font-family:var(--font-mono);font-size:.78rem;color:var(--ink);font-weight:600;margin:0 0 3px}
+    .account-cell .ac-slots{font-size:.82rem;color:var(--muted);margin:0}
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="../../" aria-label="OperationKit home">
+        <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="../../#board">Board</a>
+        <a class="navlink" href="../../#agents">Agents</a>
+        <a class="navlink" href="../../#quickstart">Quickstart</a>
+        <a class="navlink" href="../" style="color:var(--accent)">Docs</a>
+        <a class="nav-cta" href="https://github.com/m1keluka/OperationKit" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="docs-layout">
+
+      <!-- ── SIDEBAR NAV ── -->
+      <nav class="docs-nav" aria-label="Docs sections">
+        <ul>
+          <li><div class="nav-label">Getting started</div></li>
+          <li><a href="../">Setup guide</a></li>
+          <li><div class="nav-label">Architecture</div></li>
+          <li><a href="../context/">Context management</a></li>
+          <li><a href="../sessions/">Session management</a></li>
+          <li><a href="./" class="active">Multi-agent coordination</a></li>
+          <li><div class="nav-label">On this page</div></li>
+          <li><a href="#delegator-pattern">Delegator / strategy pattern</a></li>
+          <li><a href="#worktree-isolation">Worktree isolation</a></li>
+          <li><a href="#autonomous-reviewer">Autonomous reviewer</a></li>
+          <li><a href="#double-spawn">Double-spawn failure modes</a></li>
+          <li><a href="#account-rotation">Account rotation</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+
+      <!-- ── MAIN CONTENT ── -->
+      <article class="docs-content">
+
+        <p class="eyebrow">Architecture</p>
+        <h1>Multi-agent coordination</h1>
+        <p class="lead" style="margin-bottom:32px">How OperationKit distributes work across parallel Claude sessions — and the constraints that keep those sessions from interfering with each other.</p>
+
+        <!-- DELEGATOR PATTERN -->
+        <h2 id="delegator-pattern">Delegator / strategy pattern</h2>
+        <p>OperationKit coordinates agents through a pattern that will be recognizable to engineers who have worked with the <strong>Strategy</strong> design pattern or with OS process supervision: a persistent top-level session (the delegator) holds strategy while short-lived worker sessions hold execution. The delegator never writes code itself; workers never decide what to build next.</p>
+
+        <p>The delegator is not a framework or a message bus. It is a Claude session reading SQLite rows and issuing shell commands. Its loop is simple:</p>
+
+        <div class="codeframe">
+          <div class="codeframe-label">Delegator loop (conceptual)</div>
+          <pre><code>loop:
+  children = SELECT * FROM objectives WHERE parent_id = :me AND status = 'complete'
+  for child in children:
+    artifact = read(child.objective_memory_dir + '/ARTIFACT.md')
+    decide:
+      - spawn next dependent worker
+      - mark milestone done
+      - escalate to human
+  wait for [child-complete] event</code></pre>
+        </div>
+
+        <p>Workers are tmux sessions. Each is a Claude Code process started by the Command Center's session manager, given a spawn prompt that identifies the objective, the parent, and the acceptance criteria. The worker runs phases 4–6 of the pipeline (Execute → Verify → Deliver) and exits. Phases 1–3 are already resolved in the spawn prompt, so the worker never re-discovers or re-plans.</p>
+
+        <p>The delegator re-wakes on a <code>[child-complete]</code> event — a webhook posted by the session manager when a worker's objective transitions to <code>complete</code> or <code>blocked</code>. It reads the child's <code>ARTIFACT.md</code> (the deliverable record, not the scratch notes) and decides the next step. This is entirely synchronous from the delegator's perspective: it sleeps between events, reads one artifact, and either continues or escalates.</p>
+
+        <div class="deepblock">
+          <div class="db-label">Constraint</div>
+          <div class="db-title">Scope bleed</div>
+          <p>A worker must not build objective Y's feature inside objective X's thread. This is the multi-agent analog of the single-responsibility principle. A worker that discovers an adjacent improvement should write it to its <code>NOTES.md</code> and surface it in <code>ARTIFACT.md</code> — the delegator then decides whether to spawn a new objective or defer. Scope bleed is the most common reason a worker's PR fails code review: the reviewer finds changes that were not in the acceptance criteria.</p>
+        </div>
+
+        <p>This pattern is independently described in multi-agent research literature. Wu et al. (2023) in <em>AutoGen</em> model it as a <strong>GroupChat</strong> with a manager agent that routes turns among specialists — the key insight being that a coordinator who only routes is more reliable than one that also executes, because its state is small and its decisions are auditable. Hong et al. (2023) in <em>MetaGPT</em> go further, encoding the coordinator's decisions as structured role assignments with explicit message routing graphs, preventing the ad-hoc tool-call chains that cause cascading errors in naive multi-agent systems.</p>
+
+        <!-- WORKTREE ISOLATION -->
+        <h2 id="worktree-isolation">Worktree isolation and sibling read edges</h2>
+        <p>When two workers modify the same repository concurrently, the naive approach — clone, branch, and merge — produces conflicts that neither worker can resolve because each lacks context about the other's changes. OperationKit avoids this by giving each worker a <strong>dedicated git worktree</strong>: a lightweight checkout of a unique branch, sharing the object store but not the working tree.</p>
+
+        <div class="codeframe">
+          <div class="codeframe-label">Worker worktree allocation</div>
+          <pre><code># Session manager creates an isolated branch per worker
+git worktree add /tmp/cc-wt-&lt;objective-id&gt; -b obj/&lt;objective-id&gt;
+
+# Worker operates entirely inside its worktree
+cd /tmp/cc-wt-&lt;objective-id&gt;
+# ... builds, tests, commits ...
+
+# On completion, opens PR from obj/&lt;objective-id&gt; → main</code></pre>
+        </div>
+
+        <p>This means two workers building features in the same repository never touch each other's working trees. A <code>git clean</code> in one worktree cannot delete untracked files in another. A failing build in one worktree does not affect the other's <code>.next</code> cache. The isolation is enforced by the filesystem, not by convention.</p>
+
+        <h3>Sibling read edges</h3>
+        <p>Workers are not entirely isolated from each other — they sometimes need to know what a sibling delivered before they can proceed. OperationKit exposes a narrow, explicit read API for this: the <code>/siblings</code> endpoint, which returns a sibling objective's allowlisted fields only.</p>
+
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Accessible to siblings</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>id</code></td>
+              <td>Yes — for stable reference</td>
+            </tr>
+            <tr>
+              <td><code>title</code></td>
+              <td>Yes — to identify what was built</td>
+            </tr>
+            <tr>
+              <td><code>status</code></td>
+              <td>Yes — to gate on <code>complete</code> before reading artifacts</td>
+            </tr>
+            <tr>
+              <td><code>ai_review_verdict</code></td>
+              <td>Yes — to decide whether to depend on the sibling's output</td>
+            </tr>
+            <tr>
+              <td><code>last_session_summary</code></td>
+              <td>Yes — high-level summary only</td>
+            </tr>
+            <tr>
+              <td><code>updated_at</code></td>
+              <td>Yes — for freshness checks</td>
+            </tr>
+            <tr>
+              <td>Brief / spawn prompt</td>
+              <td>No — contains context that would bias the worker</td>
+            </tr>
+            <tr>
+              <td>Session logs / scratch notes</td>
+              <td>No — internal working state, not a deliverable</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>The restriction on brief and session logs is deliberate. A worker that reads another worker's scratch notes may anchor on intermediate conclusions that the other worker later discarded. The allowlist forces workers to reason from <em>outcomes</em> (what was delivered, what status it reached) rather than from <em>process</em> (what the sibling was thinking while it worked).</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>The <code>ARTIFACT.md</code> file in a completed worker's objective-memory directory is the one exception: another session may read it directly if the delegator explicitly passes the path. But this must be delegator-mediated — workers do not browse each other's memory directories unilaterally.</p>
+        </div>
+
+        <!-- AUTONOMOUS REVIEWER -->
+        <h2 id="autonomous-reviewer">Autonomous reviewer as independent quality agent</h2>
+        <p>After every working session completes, OperationKit spawns an autonomous reviewer — a separate Claude session whose only job is to grade the working session's output against the acceptance criteria. This is not self-evaluation. The reviewer has a different session context, a different system prompt, and no access to the working session's scratch notes.</p>
+
+        <p>The independence property matters for a specific reason: a model that evaluates its own output is susceptible to the same reasoning patterns that produced the error. If a working session convinced itself that a particular edge case was out of scope, it will likely reach the same conclusion when reviewing its own work. An independent session — one that never saw that rationalization — is more likely to catch it.</p>
+
+        <div class="deepblock">
+          <div class="db-label">Independence property</div>
+          <div class="db-title">A reviewer reading its own working notes grades confidence, not output</div>
+          <p>When a reviewer can access the working session's internal deliberation, it tends to validate the working session's conclusions rather than challenge them. This is the multi-agent analog of confirmation bias. OperationKit enforces independence by design: the reviewer's spawn prompt contains only the objective brief and the acceptance criteria — never <code>NOTES.md</code>.</p>
+        </div>
+
+        <p>The reviewer issues a binary verdict: <code>pass</code> or <code>fail</code>. On <code>fail</code>, the objective reverts to <code>working</code> and the reviewer's findings are injected into the next session's context automatically. The working session doesn't need to remember its failure — the harness guarantees the failure is visible.</p>
+
+        <p>This loop is a structural implementation of what Snell et al. (2024) call <strong>test-time compute scaling</strong> through verification: rather than spending more compute on a single long chain-of-thought, you spend it on multiple independent attempts and a judge. Their empirical result is that verifier-gated multi-attempt generation consistently outperforms single-attempt generation, especially on tasks with clear right/wrong criteria. OperationKit's reviewer loop is this pattern applied to software delivery: the "verifier" is an independent agent session, and the "attempts" are successive working sessions.</p>
+
+        <p>Qian et al. (2023) in <em>ChatDev</em> demonstrate the same principle in software engineering specifically: a multi-role pipeline where a "reviewer" role challenges a "programmer" role's output catches significantly more defects than single-agent generation, because the roles create adversarial pressure that a single agent lacks against its own output.</p>
+
+        <!-- DOUBLE-SPAWN -->
+        <h2 id="double-spawn">Double-spawn failure modes and mitigations</h2>
+        <p>Multi-agent systems introduce a class of failure that single-agent systems never encounter: the same objective being worked by two agents simultaneously. In OperationKit, this happens when the delegator spawns a worker, the event delivery is delayed or duplicated, and a second worker is spawned before the first has registered its presence. The result is two agents writing to the same branch — or to two branches that both create the same new file.</p>
+
+        <div class="failure-grid">
+          <div class="failure-row">
+            <div class="failure-card">
+              <div class="fc-label danger">Failure mode</div>
+              <div class="fc-title">Same worker spawned twice</div>
+              <p>Both workers pick up the objective, both open PRs. One merges cleanly; the other now conflicts against a main that already contains its changes. The second merge either double-applies logic or silently reverts the first worker's fixes.</p>
+            </div>
+            <div class="failure-card">
+              <div class="fc-label fix">Mitigation</div>
+              <div class="fc-title">Query <code>?parent_id=</code> before spawning</div>
+              <p>Before spawning a worker for objective X, the delegator queries <code>GET /objectives?parent_id=&lt;X&gt;&amp;status=working</code>. If a worker is already in flight, it waits for completion rather than spawning a duplicate.</p>
+            </div>
+          </div>
+          <div class="failure-row">
+            <div class="failure-card">
+              <div class="fc-label danger">Failure mode</div>
+              <div class="fc-title">Two workers creating the same new file</div>
+              <p>Worker A and Worker B both create <code>src/components/Modal.tsx</code> independently. Neither conflicts with the other at merge time if they write to the file in sequence — but the result is a file that concatenates both workers' implementations, with duplicate component definitions that break the TypeScript compiler only at build time, not at type-check time.</p>
+            </div>
+            <div class="failure-card">
+              <div class="fc-label fix">Mitigation</div>
+              <div class="fc-title">Check <code>git log</code> before creating new files</div>
+              <p>Before creating any new file, a worker runs <code>git log --all -- &lt;path&gt;</code>. If the path exists in any branch tracked by the remote, the worker reads it instead of creating it, and raises a scope conflict if the contents are incompatible.</p>
+            </div>
+          </div>
+          <div class="failure-row">
+            <div class="failure-card">
+              <div class="fc-label danger">Failure mode</div>
+              <div class="fc-title">Twin workers on the same branch</div>
+              <p>Both workers check out <code>obj/&lt;X&gt;</code> and begin committing. Each <code>git push</code> from Worker A forces Worker B to rebase, potentially losing changes. In a non-interactive session, the rebase may auto-resolve in ways that silently drop commits.</p>
+            </div>
+            <div class="failure-card">
+              <div class="fc-label fix">Mitigation</div>
+              <div class="fc-title">Adopt the sibling's branch if it's ahead</div>
+              <p>A worker that detects a sibling's commits on its branch runs <code>git log origin/obj/&lt;X&gt;..HEAD</code>. If the remote is ahead, it pulls and reconciles rather than force-pushing. If the sibling's work already meets the acceptance criteria, it stops and reports — it does not re-execute work that is already done.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 2L18 17H2L10 2Z"/><path d="M10 8v4M10 14v.5"/></svg>
+          <p>The double-spawn check must happen at spawn time, not at session start. By the time a worker's session starts, it may already be too late to detect the collision — both workers will be past the point of early exit.</p>
+        </div>
+
+        <p>Minsky (1986) in <em>The Society of Mind</em> observed that intelligence built from many specialized limited agents requires an arbitration mechanism: agents that operate on overlapping territory without coordination produce contradictions, not solutions. The failure modes above are exactly Minsky's prediction applied to LLM agents: two agents that each believe they are the sole author of a shared artifact will produce an incoherent result. The mitigations are the arbitration mechanism.</p>
+
+        <!-- ACCOUNT ROTATION -->
+        <h2 id="account-rotation">Account rotation for concurrency</h2>
+        <p>Claude Code imposes a per-account session limit. Running five workers in parallel under a single account will exhaust that limit and queue the fifth worker until an earlier one exits. For workloads that benefit from genuine parallelism — ten feature branches in flight simultaneously, for example — this is a binding constraint.</p>
+
+        <p>OperationKit addresses it through <strong>account rotation</strong>: a pool of dedicated agent accounts (<code>ccuser-0</code> through <code>ccuser-4</code>), each allocated up to five concurrent sessions, giving a system-wide ceiling of twenty-five concurrent agent sessions.</p>
+
+        <div class="account-grid">
+          <div class="account-cell">
+            <div class="ac-name">ccuser-0</div>
+            <div class="ac-slots">≤ 5 sessions</div>
+          </div>
+          <div class="account-cell">
+            <div class="ac-name">ccuser-1</div>
+            <div class="ac-slots">≤ 5 sessions</div>
+          </div>
+          <div class="account-cell">
+            <div class="ac-name">ccuser-2</div>
+            <div class="ac-slots">≤ 5 sessions</div>
+          </div>
+          <div class="account-cell">
+            <div class="ac-name">ccuser-3</div>
+            <div class="ac-slots">≤ 5 sessions</div>
+          </div>
+          <div class="account-cell">
+            <div class="ac-name">ccuser-4</div>
+            <div class="ac-slots">≤ 5 sessions</div>
+          </div>
+        </div>
+
+        <p>The session manager allocates accounts using a least-loaded strategy: before spawning a new worker, it queries the current session count per account and assigns the worker to the account with the most headroom. This is not round-robin — it concentrates workers on fewer accounts when load is low, keeping unused accounts available for burst capacity.</p>
+
+        <div class="codeframe">
+          <div class="codeframe-label">Account allocation (session manager)</div>
+          <pre><code>-- Find the least-loaded account with capacity
+SELECT account_id, COUNT(*) as active_sessions
+FROM agent_sessions
+WHERE status = 'running'
+GROUP BY account_id
+HAVING COUNT(*) < 5
+ORDER BY active_sessions ASC
+LIMIT 1;</code></pre>
+        </div>
+
+        <p>Each account is a distinct Claude Code subscription with its own OAuth credential and its own git author identity (<code>GIT_AUTHOR_EMAIL</code>, <code>GIT_AUTHOR_NAME</code>). Workers spawned under different accounts produce commits attributed to their account — which means a git log on a multi-worker branch will show different authors for different commits, giving a readable audit trail of which session did what.</p>
+
+        <div class="note">
+          <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
+          <p>True parallelism requires distributing across accounts, not just goroutines. Spawning five workers under the same account queues the fifth. Spawning them across five accounts starts all five immediately. The bottleneck is the per-account session limit, not the server's ability to run concurrent processes.</p>
+        </div>
+
+        <p>This concurrency model scales in the same direction as the test-time compute literature. Snell et al. (2024) show that scaling inference-time compute — running more parallel attempts and selecting the best — consistently improves output quality on verifiable tasks. Account rotation is what makes parallel attempts financially and technically feasible: each additional account adds five more concurrent slots, so the system can scale horizontally in increments of five without hitting a single-account ceiling.</p>
+
+        <!-- REFERENCES -->
+        <h2 id="references">References</h2>
+        <p>The coordination patterns above are grounded in published multi-agent and inference-scaling research. The citations below point to the specific papers that informed each design choice.</p>
+
+        <ul class="ref-list">
+          <li class="ref-item">
+            <p class="ref-title">AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation</p>
+            <p class="ref-authors">Wu, Q., Bansal, G., Zhang, J., Wu, Y., Li, B., Zhu, E., … &amp; Wang, C. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Introduces the manager/specialist decomposition that underpins OperationKit's delegator pattern. AutoGen's core insight — that a coordinator who only routes is more reliable than one that also executes — directly motivates keeping strategy in the delegator and execution in workers. Also documents the conversational message-passing primitives that OperationKit replaces with SQLite rows and filesystem artifacts for durability.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2308.08155" rel="noopener" target="_blank">arxiv.org/abs/2308.08155 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">MetaGPT: Meta Programming for Multi-Agent Collaborative Framework</p>
+            <p class="ref-authors">Hong, S., Zhuge, M., Chen, J., Zheng, X., Cheng, Y., Zhang, C., … &amp; Schmidhuber, J. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> MetaGPT encodes role assignments as structured message routing graphs with explicit handoff contracts — preventing the ad-hoc tool-call chains that cascade into errors in naive multi-agent systems. This directly informs the allowlisted sibling read API: workers communicate through structured, schema-validated fields rather than reading each other's raw session state.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2308.00352" rel="noopener" target="_blank">arxiv.org/abs/2308.00352 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">ChatDev: Communicative Agents for Software Development</p>
+            <p class="ref-authors">Qian, C., Liu, W., Liu, H., Chen, N., Dang, Y., Li, J., … &amp; Liu, Z. (2023). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> ChatDev demonstrates that a dedicated reviewer role — one that challenges the programmer's output rather than continuing from it — catches significantly more defects than a single-agent pipeline. This is the empirical foundation for OperationKit's autonomous reviewer: the reviewer's independence is not a process nicety but a measurable quality lever. ChatDev's software-engineering domain makes the findings directly applicable to OperationKit's working sessions.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2307.07924" rel="noopener" target="_blank">arxiv.org/abs/2307.07924 ↗</a>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">The Society of Mind</p>
+            <p class="ref-authors">Minsky, M. (1986). <em>Simon &amp; Schuster</em>. ISBN 978-0-671-65713-0.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Minsky's central claim — that intelligence emerges from the interaction of many specialized, individually limited agents — is the theoretical premise behind all of the multi-agent systems above. More specifically for OperationKit: Minsky's prediction that agents operating on overlapping territory without arbitration produce contradictions (not solutions) is exactly what the double-spawn mitigations guard against. The delegator/strategy pattern is the arbitration mechanism Minsky said was required.</p>
+          </li>
+
+          <li class="ref-item">
+            <p class="ref-title">Scaling LLM Test-Time Compute Optimally</p>
+            <p class="ref-authors">Snell, C., Lee, J., Xu, K., &amp; Kumar, A. (2024). <em>arXiv preprint</em>.</p>
+            <p class="ref-why"><strong>Why it matters here:</strong> Provides the empirical argument for the reviewer loop and for account-rotation-enabled parallelism. Snell et al. show that verifier-gated multi-attempt generation consistently outperforms single-attempt generation on verifiable tasks — that spending test-time compute on parallel attempts plus a judge is more efficient than spending it on a longer single chain-of-thought. OperationKit's reviewer loop is this pattern at the session level; account rotation is what makes parallel attempts feasible at scale.</p>
+            <a class="ref-link" href="https://arxiv.org/abs/2408.03314" rel="noopener" target="_blank">arxiv.org/abs/2408.03314 ↗</a>
+          </li>
+        </ul>
+
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle (shared behavior)
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('ok-theme', next); } catch(e) {}
+      });
+    }
+    // Active section tracking
+    const sections = document.querySelectorAll('h2[id], h3[id]');
+    const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+    if (sections.length && navLinks.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            const a = document.querySelector(`.docs-nav a[href="#${e.target.id}"]`);
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(s => obs.observe(s));
+    }
+  </script>
+</body>
+</html>
