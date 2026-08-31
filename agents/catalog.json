@@ -2,79 +2,79 @@
   "schema_version": "1.0",
   "catalog": "operationkit-agents",
   "description": "Free, first-party agent catalog for OperationKit. Download a persona file and add it to your OperationKit workspace to install a new agent.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "agents": [
     {
       "id": "cto",
       "name": "Chief Technology Officer",
-      "role": "CTO",
-      "description": "Owns the full technical lifecycle — evaluating ideas, writing PRDs, decomposing work, orchestrating developer sub-agents, and shipping verified code with rigorous QA.",
+      "role": "Engineering & Build",
+      "description": "Routes engineering work, decomposes PRDs into objectives, coordinates developers, manages deploys, and owns the full build lifecycle. Loads the six-phase pipeline on every task.",
       "version": "1.0.0",
-      "tags": ["engineering", "product", "technical-leadership", "prd", "code-review"],
+      "tags": ["engineering", "prd", "deploy", "objectives"],
       "file": "agents/cto.md"
     },
     {
       "id": "cmo",
       "name": "Chief Marketing Officer",
-      "role": "CMO",
-      "description": "Owns brand positioning, marketing strategy, SEO/GEO content, campaigns, and go-to-market materials — from pitch decks and landing pages to content calendars and email sends.",
+      "role": "Marketing & Brand",
+      "description": "Positioning, copy, campaign strategy, landing pages, and brand voice. Knows when to push back on a brief that undercuts established positioning. Never creates generic collateral.",
       "version": "1.0.0",
-      "tags": ["marketing", "brand", "content", "seo", "campaigns", "gtm"],
+      "tags": ["marketing", "copy", "brand", "campaigns"],
       "file": "agents/cmo.md"
     },
     {
       "id": "coo",
       "name": "Chief Operating Officer",
-      "role": "COO",
-      "description": "Owns operations strategy, systems architecture, platform integration, tool evaluation, and process design — turning fuzzy workflows into documented, diagrammed, executable systems.",
+      "role": "Operations & Systems",
+      "description": "Operations strategy, platform integrations, process diagrams, tool evaluation. Maps how work flows through the business and finds the places where it doesn't.",
       "version": "1.0.0",
-      "tags": ["operations", "systems", "process", "integration", "diagrams"],
+      "tags": ["ops", "systems", "integrations", "flowcharts"],
       "file": "agents/coo.md"
     },
     {
       "id": "cfo",
       "name": "Chief Financial Officer",
-      "role": "CFO",
-      "description": "Owns financial visibility and discipline — cash position, runway, P&L, bookkeeping, and forecasting — translating raw financial data into clear decisions and projections.",
+      "role": "Finance & Reporting",
+      "description": "Cash position, runway, P&L, bookkeeping, QuickBooks, and forecasting. Pulls real numbers, not projections. Escalates when a financial decision needs a human.",
       "version": "1.0.0",
-      "tags": ["finance", "accounting", "forecasting", "runway", "bookkeeping"],
+      "tags": ["finance", "reporting", "forecasting", "quickbooks"],
       "file": "agents/cfo.md"
     },
     {
-      "id": "designer",
-      "name": "Product Designer",
-      "role": "Designer",
-      "description": "Owns UI/UX and visual identity — design systems, component design, typography/color/layout decisions, accessibility audits, and design reviews that make products look and feel right.",
+      "id": "chief-of-staff",
+      "name": "Executive Assistant",
+      "role": "Coordination & Capture",
+      "description": "Email, calendar, task capture, follow-ups, morning review, and weekly planning. The agent that keeps every other agent on track. First responder for anything that does not have a better home.",
       "version": "1.0.0",
-      "tags": ["design", "ui", "ux", "design-systems", "accessibility", "visual-identity"],
-      "file": "agents/designer.md"
-    },
-    {
-      "id": "hr",
-      "name": "Head of People",
-      "role": "HR",
-      "description": "Owns hiring and people ops — job postings, sourcing, interview guides, structured candidate scoring, and onboarding — building a repeatable, fair recruiting pipeline.",
-      "version": "1.0.0",
-      "tags": ["hr", "recruiting", "hiring", "interviews", "onboarding", "people-ops"],
-      "file": "agents/hr.md"
+      "tags": ["email", "calendar", "tasks", "capture"],
+      "file": "agents/chief-of-staff.md"
     },
     {
       "id": "general-counsel",
       "name": "General Counsel",
-      "role": "Legal",
-      "description": "Owns legal drafting and review — contracts, agreements, and compliance — flagging risk and producing clean first drafts. Not a substitute for a licensed attorney.",
+      "role": "Legal & Compliance",
+      "description": "Contract review, legal drafting, privacy policy, DPA, offer letters, and compliance questions. Works from attorney-drafted starting drafts. Flags when something needs a real lawyer.",
       "version": "1.0.0",
-      "tags": ["legal", "contracts", "compliance", "drafting", "risk"],
+      "tags": ["legal", "contracts", "compliance", "privacy"],
       "file": "agents/general-counsel.md"
     },
     {
-      "id": "chief-of-staff",
-      "name": "Chief of Staff",
-      "role": "Chief of Staff / Executive Assistant",
-      "description": "The operator's right hand — prioritization and reviews, inbox triage and email drafting, strategic pushback and brainstorming, and memo/decision-doc drafting to keep the principal focused and moving.",
+      "id": "hr",
+      "name": "HR",
+      "role": "People & Hiring",
+      "description": "Job postings, interview guides, candidate scoring, offer letters, and onboarding. Owns the hiring funnel from first post to first day. Coordinates with legal on offer letters.",
       "version": "1.0.0",
-      "tags": ["executive-assistant", "chief-of-staff", "email", "prioritization", "planning", "research"],
-      "file": "agents/chief-of-staff.md"
+      "tags": ["hiring", "recruiting", "onboarding", "hr"],
+      "file": "agents/hr.md"
+    },
+    {
+      "id": "designer",
+      "name": "Designer",
+      "role": "Design & UI/UX",
+      "description": "UI/UX design, design systems, visual identity, component design, and accessibility audits. Thinks in positioning and user behavior, not just pixels. Reviews designs against the brand before calling them done.",
+      "version": "1.0.0",
+      "tags": ["design", "ui", "ux", "brand"],
+      "file": "agents/designer.md"
     }
   ]
 }
