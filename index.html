@@ -75,9 +75,7 @@
         </div>
         <h1>The self-hosted agent platform<br><span class="accent">that ships finished, not blank.</span></h1>
         <p class="hero-oneliner">
-          Rivals ship empty: one user, no roles, no review gate, and you assemble the rest yourself.
-          OperationKit arrives configured: multi-tenant workspaces, role-based access, a six-phase agent pipeline,
-          and an adversarial reviewer that grades every objective before you see it. Your keys. Your server. Your data.
+          Most agent platforms ship blank. OperationKit arrives configured: multi-tenant workspaces, RBAC, a six-phase pipeline, and an adversarial reviewer that grades every output before you see it. Your keys, your server.
         </p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="/waitlist/">
@@ -93,8 +91,6 @@
           <span class="chip"><i class="cdot"></i> <b>multi-tenant workspaces</b></span>
           <span class="chip"><i class="cdot"></i> <b>RBAC + agent personas</b></span>
           <span class="chip"><i class="cdot"></i> <b>adversarial review gate</b></span>
-          <span class="chip"><i class="cdot"></i> <b>Apache-2.0</b></span>
-          <span class="chip"><i class="cdot"></i> <b>any model</b></span>
         </div>
       </div>
     </section>
@@ -102,7 +98,7 @@
     <!-- ============ PROOF STRIP ============ -->
     <div class="proof-strip" aria-label="Live inventory">
       <div class="wrap">
-        <span class="proof-line">53 tools &middot; 82 skills &middot; 19 agents &middot; lives inside Mike&#39;s daily operation</span>
+        <span class="proof-line">53 tools &middot; 82 skills &middot; 19 agents</span>
       </div>
     </div>
 
@@ -113,10 +109,7 @@
           <p class="eyebrow">The field left something open</p>
           <h2>Every other platform ships empty.</h2>
           <p class="lead">
-            Look at the agent tools available today: Hermes, OpenClaw, OpenHands, Flowise, CrewAI. Most install in one command. That part is solved. What you get after the install: a blank, single-user assistant, no roles, no isolated workspaces, and a configuration gap you fill yourself. The moment a second person joins, or you need to serve multiple clients from one deployment, or you need a review gate on agent output, every one of them either cannot do it or sells you a paid enterprise tier to unlock what should have been there from the start.
-          </p>
-          <p class="lead" style="margin-top:18px;">
-            OperationKit is what you get when you build that layer ground-up instead of bolting it on.
+            Hermes, OpenClaw, OpenHands, Flowise, CrewAI: all install fast. After the install, you get a blank, single-user assistant. No roles, no isolated workspaces, no review gate. The moment a second user joins or a client needs isolation, you're on your own.
           </p>
         </div>
 
@@ -126,21 +119,21 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
             <h3>Ships with agents and roles.</h3>
-            <p>Not a blank canvas. A configured operation. Six-phase pipeline, C-suite agent personas, per-workspace context. Change any of it; it is all plain markdown you own.</p>
+            <p>Ships configured. Six-phase pipeline, C-suite personas, per-workspace context. Plain markdown you own.</p>
           </div>
           <div class="gap-pillar">
             <div class="gap-pillar-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <h3>Multi-tenant out of the box.</h3>
-            <p>One deployment, many isolated workspaces, real RBAC. No per-seat SaaS fee. No sales call to unlock governance.</p>
+            <p>One deployment, isolated workspaces, real RBAC. No sales call to unlock it.</p>
           </div>
           <div class="gap-pillar">
             <div class="gap-pillar-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <h3>Governed by design.</h3>
-            <p>Every objective goes through a fresh-context adversarial reviewer before it reaches you. The acceptance criteria are locked before the work starts. The reviewer auto-iterates on failures. You see results, not drafts.</p>
+            <p>An adversarial reviewer grades every output against locked criteria.</p>
           </div>
         </div>
       </div>
@@ -153,7 +146,7 @@
           <p class="eyebrow">Under the hood</p>
           <h2>Four layers. One-way dependency.</h2>
           <p class="lead">
-            Tools &#8594; Skills &#8594; Agents. Edges are declared in frontmatter and validated by the <code class="mono">okit</code> CLI at authoring time. A dangling reference is a hard failure, not a silent warning. That is what "machine-checkable" means here: the graph is a fact, not a convention.
+            Tools &#8594; Skills &#8594; Agents. Edges declared in frontmatter, validated by <code class="mono">okit</code>. Dangling references are build failures.
           </p>
         </div>
 
@@ -164,7 +157,7 @@
             <div class="deep-body">
               <h3>Objectives, not tasks.</h3>
               <p>
-                Work lives on a Kanban board where every objective runs in its own dedicated session. A strategy objective decomposes itself into worker objectives and spawns them. Workers run, get reviewed, and report back. The delegator re-wakes on completion and decides the next step. Up to 25 concurrent sessions. SQLite-backed state that survives restarts.
+                Every objective runs in its own dedicated session. Strategy objectives spawn workers and re-wake on completion. Workers run, get reviewed, report back. SQLite-backed state survives restarts.
               </p>
             </div>
             <div class="deep-media">
@@ -189,7 +182,7 @@
             <div class="deep-body">
               <h3>A second agent grades every output.</h3>
               <p>
-                When a working session finishes, a fresh-context reviewer reads the output against acceptance criteria that were locked before work began. It cannot see the worker's scratch notes, only the deliverable and the criteria. If it fails, the session reverts to working with the findings prepended. It iterates up to three times before escalating to you. This is not a linter. It is a separate agent with a separate context and a single job: refuse to pass what does not meet the bar.
+                A fresh-context reviewer grades output against pre-locked criteria, blind to the worker's scratch. Auto-iterates up to three times. You see results, not drafts.
               </p>
             </div>
             <div class="deep-media">
@@ -212,7 +205,7 @@
             <div class="deep-body">
               <h3>Context that loads in the right order.</h3>
               <p>
-                Each session assembles four tiers before the model sees a single token. Global routing rules load first. The agent persona loads second. The workspace business context loads third. The user profile loads last. Late-loaded knowledge cannot override a stable rule. Most agent harnesses have one tier: a system prompt. Some have two. OperationKit has four, validated at authoring time by <code class="mono">okit validate</code>.
+                Four tiers load before the model sees a token: global routing, agent persona, workspace context, user profile. Late-loaded tiers cannot override earlier rules. OperationKit has four, validated by <code class="mono">okit validate</code>.
               </p>
             </div>
             <div class="deep-media">
@@ -237,7 +230,7 @@
             <div class="deep-body">
               <h3>Tools, skills, agents. Every edge is declared.</h3>
               <p>
-                53 tools. 82 skills. 19 agents. Each skill declares which tools it calls. Each agent declares which skills it loads. <code class="mono">okit validate</code> walks the graph and hard-fails on any declared slug that does not resolve. A skill that references a tool that has been renamed is a build error, not a runtime surprise. The graph is machine-checkable. That is the thing no other system in the field currently does.
+                53 tools. 82 skills. 19 agents. Every edge declared in frontmatter. <code class="mono">okit validate</code> hard-fails on any slug that does not resolve. A renamed tool is a build error.
               </p>
             </div>
             <div class="deep-media">
@@ -271,18 +264,18 @@
         <div class="obj-cards reveal">
 
           <div class="obj-card">
-            <p class="obj-q">I can already use Hermes or OpenClaw. They install in one command.</p>
-            <p class="obj-a">They do, and that part is solved. After the install, you have a blank single-user assistant with no roles, no isolated workspaces, and no review gate. You assemble the rest yourself. OperationKit installs from your API keys too. The difference is what's there when it's done.</p>
+            <p class="obj-q">Hermes and OpenClaw already install in one command.</p>
+            <p class="obj-a">That part's solved. After the install, you have a blank single-user assistant: no roles, no isolated workspaces, no review gate. OperationKit installs the same way. The difference is what's already there.</p>
           </div>
 
           <div class="obj-card">
-            <p class="obj-q">What about my API keys? Is this safe?</p>
-            <p class="obj-a">OperationKit is not a security sandbox. It runs on your server, in code you can read. Your keys do not leave your machine. There is no vendor layer between your credentials and the model provider. If your threat model requires a hardened managed SaaS, this is not it. If "I need to see every line of code that touches my keys" is the requirement, this is built for that.</p>
+            <p class="obj-q">What about my API keys?</p>
+            <p class="obj-a">It runs on your server, code you can audit. Your keys do not leave your machine. Not a hardened managed SaaS, not a security guarantee. If "I need to read every line that touches my keys" is the bar, this is it.</p>
           </div>
 
           <div class="obj-card">
             <p class="obj-q">The full source isn't public. How do I evaluate this?</p>
-            <p class="obj-a">The teaser repo at <a href="https://github.com/m1keluka/OperationKit" rel="noopener" target="_blank">github.com/m1keluka/OperationKit</a> is the public face today. Star it. Join the waitlist. When the full Apache-2.0 source ships, waitlist members get it first. The star-then-email sequence on the waitlist page is the whole funnel.</p>
+            <p class="obj-a">Star the repo at <a href="https://github.com/m1keluka/OperationKit" rel="noopener" target="_blank">github.com/m1keluka/OperationKit</a>. Join the waitlist. Full Apache-2.0 source ships to waitlist members first. The star-then-email sequence is the whole funnel.</p>
           </div>
 
         </div>
@@ -292,9 +285,8 @@
     <!-- ============ FINAL CTA BAND ============ -->
     <section class="section cta-band" id="cta">
       <div class="wrap reveal">
-        <p class="eyebrow">Get there early</p>
-        <h2>The agent layer is not commoditized yet.</h2>
-        <p class="cta-lead">The infrastructure for running governed, multi-tenant agent operations on your own keys is still open. Join the first cohort.</p>
+        <h2>Get there early.</h2>
+        <p class="cta-lead">The infrastructure for governed, multi-tenant agent operations on your own keys is still open. Join the first cohort.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="/waitlist/">
             Join the waitlist
@@ -312,19 +304,12 @@
       <div class="footer-top">
         <div class="footer-logo">
           <span class="wordmark"><span class="caret" aria-hidden="true">›</span>operationkit</span>
-          <p>Self-hosted agent operations. Multi-tenant, governed by design, Apache-2.0.</p>
         </div>
         <div class="footer-cols">
           <div class="footer-col">
-            <h4>Project</h4>
             <a href="docs/">Docs</a>
-            <a href="https://github.com/m1keluka/OperationKit" rel="noopener" target="_blank">GitHub</a>
-            <a href="https://github.com/m1keluka/OperationKit/blob/main/LICENSE" rel="noopener" target="_blank">License</a>
-          </div>
-          <div class="footer-col">
-            <h4>Site</h4>
             <a href="#agents">Agents</a>
-            <a href="marketplace/">Marketplace</a>
+            <a href="https://github.com/m1keluka/OperationKit" rel="noopener" target="_blank">GitHub</a>
             <a href="/waitlist/">Waitlist</a>
           </div>
         </div>
@@ -334,6 +319,7 @@
           <a class="lic-badge" href="https://github.com/m1keluka/OperationKit/blob/main/LICENSE" rel="noopener" target="_blank" aria-label="License: Apache-2.0">
             <span class="lic-k">license</span><span class="lic-v">Apache-2.0</span>
           </a>
+          <span class="footer-note">Open source. Your server. Your data.</span>
         </span>
         <span class="footer-note">Not a security sandbox. Read the code before trusting it with your keys.</span>
       </div>
