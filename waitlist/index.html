@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="../styles.css" />
 
   <style>
-    /* Page-specific layer — uses the site's design tokens so it stays on-brand with the home page. */
+    /* Page-specific layer - uses the site's design tokens so it stays on-brand with the home page. */
     .wl-main { min-height: calc(100vh - 70px); display: flex; align-items: center; padding: 40px 0; }
     .wl-card {
       max-width: 620px; margin: 0 auto; padding: clamp(28px, 5vw, 56px);
@@ -160,7 +160,7 @@
     /* ───────────────────────────────────────────────────────────────────────
        Email capture → Supabase (write-only). GitHub Pages is static, so the form
        inserts directly into a Postgres table via Supabase's REST API. The anon
-       key is public by design; row-level security allows INSERT only — nobody can
+       key is public by design; row-level security allows INSERT only - nobody can
        read the list back with this key (only the project's service key can).
        ─────────────────────────────────────────────────────────────────────── */
     const SUPABASE_URL = "https://gaomuvxsybezkmykrkfm.supabase.co";
@@ -201,7 +201,7 @@
           show('Something went wrong. Try again in a moment.', 'err');
         }
       } catch (_) {
-        show('Network hiccup — try again in a moment.', 'err');
+        show('Network hiccup - try again in a moment.', 'err');
       } finally {
         btn.disabled = false;
       }
