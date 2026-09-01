@@ -28,7 +28,7 @@
   --font-display:Geist,"Inter Tight",system-ui,sans-serif;
   --font-body:Inter,system-ui,-apple-system,sans-serif;
   --font-mono:"Geist Mono","JetBrains Mono",ui-monospace,monospace;
-  --maxw:1120px; --radius:14px; --radius-sm:9px;
+  --maxw:1280px; --radius:14px; --radius-sm:9px;
 
   /* semantic tokens — LIGHT (default). Dark is a short override below. */
   --bg:var(--bone);
@@ -151,7 +151,7 @@ img,svg{max-width:100%}
 .beacon-dot{position:absolute;inset:0;margin:auto;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}
 @keyframes ping{0%{transform:scale(.4);opacity:.9}100%{transform:scale(3.4);opacity:0}}
 @media (prefers-reduced-motion:reduce){.beacon span{animation:none;opacity:.18}}
-.hero-inner{position:relative;z-index:1;max-width:830px}
+.hero-inner{position:relative;z-index:1;max-width:1280px}
 .status-pill{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:.8rem;
   font-weight:500;letter-spacing:.02em;color:var(--text);background:var(--surface);
   border:1px solid var(--border-strong);border-radius:999px;padding:7px 14px;margin-bottom:26px}
