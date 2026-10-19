@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OperationKit: Your work infrastructure. Any model. Your server.</title>
-  <meta name="description" content="Self-hosted, multi-tenant work infrastructure for teams of small to medium-sized businesses. Point it at Claude, Codex, Grok, or your own models. Apache-2.0." />
+  <title>OperationKit: Bring your own agent. Keep your own work.</title>
+  <meta name="description" content="Self-hosted work-and-knowledge infrastructure for AI agents. Connect Claude Code, Codex, Grok Build, or OpenClaw over MCP. Apache-2.0." />
   <meta name="theme-color" content="#0c0f14" />
 
   <!-- no-flash theme init: default dark; honor a stored 'light' preference before first paint -->
@@ -17,17 +17,17 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="OperationKit" />
-  <meta property="og:title" content="OperationKit: Your work infrastructure. Any model. Your server." />
-  <meta property="og:description" content="Self-hosted, multi-tenant work infrastructure for teams of small to medium-sized businesses. Point it at Claude, Codex, Grok, or your own models." />
+  <meta property="og:title" content="OperationKit: Bring your own agent. Keep your own work." />
+  <meta property="og:description" content="Self-hosted work-and-knowledge infrastructure for AI agents. Connect Claude Code, Codex, Grok Build, or OpenClaw over MCP." />
   <link rel="canonical" href="https://operationkit.com/" />
   <meta property="og:url" content="https://operationkit.com/" />
   <meta property="og:image" content="https://operationkit.com/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="OperationKit. Your work infrastructure. Any model. Your server." />
+  <meta property="og:image:alt" content="OperationKit. Bring your own agent. Keep your own work." />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="OperationKit: Your work infrastructure. Any model. Your server." />
-  <meta name="twitter:description" content="Self-hosted, multi-tenant work infrastructure for teams of small to medium-sized businesses. Point it at Claude, Codex, Grok, or your own models. Apache-2.0." />
+  <meta name="twitter:title" content="OperationKit: Bring your own agent. Keep your own work." />
+  <meta name="twitter:description" content="Self-hosted work-and-knowledge infrastructure for AI agents. Connect Claude Code, Codex, Grok Build, or OpenClaw over MCP. Apache-2.0." />
   <meta name="twitter:image" content="https://operationkit.com/og-image.png" />
 
   <link rel="preload" as="font" type="font/woff2" href="fonts/geist-sans-700.woff2" crossorigin />
@@ -71,10 +71,10 @@
       </div>
       <div class="wrap hero-inner">
         <div class="status-pill">
-          <i class="live-dot"></i> Self-hosted &middot; Multi-tenant &middot; Model-agnostic &middot; Apache-2.0
+          <i class="live-dot"></i> Self-hosted &middot; Agent-agnostic &middot; MCP-ready &middot; Apache-2.0
         </div>
-        <h1>Your work infrastructure.<br><span class="accent">Any model. Your server.</span></h1>
-        <p class="hero-oneliner">Workspaces, knowledge, agents, and a review gate, on self-hosted infrastructure for teams of small to medium-sized businesses. Run it on Claude today, an open-weight model on your own GPUs tomorrow. Nothing you build is locked to one AI lab.</p>
+        <h1>Bring your own agent.<br><span class="accent">Keep your own work.</span></h1>
+        <p class="hero-oneliner">A self-hosted board and knowledge base that any personal AI agent can drive over MCP, Claude Code, Codex, Grok Build, OpenClaw, or whatever you run next year. Swap the agent and the work stays, because none of it ever lived inside the agent.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="/waitlist/">
             Join the waitlist
@@ -86,9 +86,9 @@
         </div>
         <div class="hero-chips" aria-label="Key properties">
           <span class="chip"><i class="cdot"></i> <b>self-hosted, your server</b></span>
-          <span class="chip"><i class="cdot"></i> <b>multi-tenant workspaces</b></span>
-          <span class="chip"><i class="cdot"></i> <b>RBAC + agent personas</b></span>
-          <span class="chip"><i class="cdot"></i> <b>any model: Claude, Codex, Grok, local</b></span>
+          <span class="chip"><i class="cdot"></i> <b>any MCP agent: Claude Code, Codex, Grok Build, OpenClaw</b></span>
+          <span class="chip"><i class="cdot"></i> <b>knowledge base that travels with you</b></span>
+          <span class="chip"><i class="cdot"></i> <b>multi-tenant workspaces + RBAC</b></span>
         </div>
       </div>
     </section>
@@ -99,6 +99,52 @@
         <span class="proof-line">53 tools &middot; 82 skills &middot; 19 agents</span>
       </div>
     </div>
+
+    <!-- ============ BRING YOUR OWN AGENT ============ -->
+    <section class="section" id="agent-compat" style="background:var(--surface-2)">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow">Agent-agnostic</p>
+          <h2>Bring your own agent. Connect it over MCP.</h2>
+          <p class="lead">OperationKit doesn't ship a personal agent of its own. Point whichever one you already run at its MCP server (read-only: search, read, and list your knowledge base and board, no write access) and it drives the work.</p>
+        </div>
+
+        <div class="capgrid reveal">
+          <div class="capcard">
+            <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div>
+            <h3>Claude Code</h3>
+            <p>Official MCP client. Bundled into Claude Pro/Max; add OperationKit with <code class="mono">claude mcp add</code>.</p>
+            <span class="tag">verified: MCP client</span>
+          </div>
+          <div class="capcard">
+            <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div>
+            <h3>Codex CLI</h3>
+            <p>Official MCP client, stdio and Streamable HTTP. Bundled into ChatGPT Plus/Pro/Business.</p>
+            <span class="tag">verified: MCP client</span>
+          </div>
+          <div class="capcard">
+            <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div>
+            <h3>Grok Build</h3>
+            <p>MCP servers work out of the box, including headless/scripted use, on every X Subscription tier.</p>
+            <span class="tag">verified: MCP client</span>
+          </div>
+          <div class="capcard">
+            <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div>
+            <h3>OpenClaw</h3>
+            <p>Native MCP support, tools/resources/prompts. Free, MIT-licensed, self-hosted, bring your own LLM key.</p>
+            <span class="tag">verified: MCP client</span>
+          </div>
+          <div class="capcard is-roadmap">
+            <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div>
+            <h3>Manus</h3>
+            <p>Supports MCP only through its own prebuilt connectors (Notion, Atlassian, Linear). No documented way to add a custom server today, so it can't drive OperationKit directly yet.</p>
+            <span class="roadmap"><i class="rdot"></i>Not yet compatible</span>
+          </div>
+        </div>
+
+        <p class="lead" style="margin-top:28px;max-width:64ch">Run your own coding subscription, not a shared one: Claude, OpenAI, and xAI all permit automating your own single account and all prohibit pooling or reselling one seat across different people. If you run OperationKit's workspaces for genuinely separate clients or teams, give each its own account, not a shared seat.</p>
+      </div>
+    </section>
 
     <!-- ============ WHY OWN IT ============ -->
     <section class="section" id="own">
@@ -196,7 +242,7 @@
         <div class="sec-head reveal">
           <p class="eyebrow">The field left something open</p>
           <h2>The shared board your agents drive.</h2>
-          <p class="lead">Hermes, OpenClaw, and Grok Bot each install in one command. Paste your OperationKit API key and they drive objectives on the board. Every session loads your team's shared context. Real use means multiple Pro coding subscriptions. OperationKit rotates the seats.</p>
+          <p class="lead">Hermes, OpenClaw, and Grok Bot each install in one command. Paste your OperationKit API key, or point an MCP client at it, and they drive objectives and read your team's shared knowledge base. Running more than one coding subscription of your own? The account router rotates across them for you, your accounts, your rate limits, never a seat shared across different people.</p>
         </div>
 
         <div class="gap-pillars reveal">
@@ -351,7 +397,7 @@
 
           <div class="obj-card">
             <p class="obj-q">Hermes, OpenClaw, and Grok Bot already install in one command.</p>
-            <p class="obj-a">They do. Give any of them your OperationKit API key and they control objectives on the board. OperationKit adds the workspaces, shared context, and seat rotation your real-use load requires.</p>
+            <p class="obj-a">They do, and OperationKit doesn't compete with them, it's what they drive. Give any MCP-capable agent your OperationKit API key and it controls objectives on the board and reads your knowledge base live. OperationKit adds the workspaces, shared context, and a router that spreads your own accounts' rate limits, never someone else's seat.</p>
           </div>
 
           <div class="obj-card">
