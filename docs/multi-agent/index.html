@@ -306,55 +306,43 @@ cd /tmp/cc-wt-&lt;objective-id&gt;
 
         <!-- ACCOUNT ROTATION -->
         <h2 id="account-rotation">Account rotation for concurrency</h2>
-        <p>Claude Code imposes a per-account session limit. Running five workers in parallel under a single account will exhaust that limit and queue the fifth worker until an earlier one exits. For workloads that benefit from genuine parallelism — ten feature branches in flight simultaneously, for example — this is a binding constraint.</p>
+        <p>Each subscription seat (Claude, Grok, or Codex) carries its own provider-side rate limit. Running every worker under a single seat exhausts that limit fast and queues or 429s the rest. For workloads that benefit from genuine parallelism — several feature branches in flight simultaneously, for example — this is a binding constraint.</p>
 
-        <p>OperationKit addresses it through <strong>account rotation</strong>: a pool of dedicated agent accounts (<code>ccuser-0</code> through <code>ccuser-4</code>), each allocated up to five concurrent sessions, giving a system-wide ceiling of twenty-five concurrent agent sessions.</p>
+        <p>OperationKit addresses it through <strong>account rotation</strong>: an account-router holds a pool of seats per engine, each with its own home directory and OAuth credential, and assigns a new session to the highest-priority seat that isn't currently rate-limited or flagged for a dead credential. Full detail (priority order, rate-limit vs. credential-failure handling, how seats are connected) lives on the wiki's <a href="https://github.com/m1keluka/OperationKit/wiki/Accounts-Subscriptions-and-Seats">Accounts, Subscriptions &amp; Seats</a> page.</p>
 
         <div class="account-grid">
           <div class="account-cell">
-            <div class="ac-name">ccuser-0</div>
-            <div class="ac-slots">≤ 5 sessions</div>
+            <div class="ac-name">Primary</div>
+            <div class="ac-slots">priority 10</div>
           </div>
           <div class="account-cell">
-            <div class="ac-name">ccuser-1</div>
-            <div class="ac-slots">≤ 5 sessions</div>
+            <div class="ac-name">Secondary</div>
+            <div class="ac-slots">priority 0</div>
           </div>
           <div class="account-cell">
-            <div class="ac-name">ccuser-2</div>
-            <div class="ac-slots">≤ 5 sessions</div>
+            <div class="ac-name">Tertiary</div>
+            <div class="ac-slots">priority 0</div>
           </div>
           <div class="account-cell">
-            <div class="ac-name">ccuser-3</div>
-            <div class="ac-slots">≤ 5 sessions</div>
+            <div class="ac-name">Quaternary</div>
+            <div class="ac-slots">priority 0</div>
           </div>
           <div class="account-cell">
-            <div class="ac-name">ccuser-4</div>
-            <div class="ac-slots">≤ 5 sessions</div>
+            <div class="ac-name">…</div>
+            <div class="ac-slots">more seats as added</div>
           </div>
         </div>
 
-        <p>The session manager allocates accounts using a least-loaded strategy: before spawning a new worker, it queries the current session count per account and assigns the worker to the account with the most headroom. This is not round-robin — it concentrates workers on fewer accounts when load is low, keeping unused accounts available for burst capacity.</p>
+        <p>Seats aren't equally weighted — a lower priority number is preferred, so the router fills in priority order and falls back to lower-priority seats only once higher-priority ones are busy or limited. A rate limit (429) benches a seat until its own reset time; a credential failure (401 — expired or revoked login) is tracked separately, since it doesn't self-heal on a timer, and parks that seat as "needs reconnect" instead of retrying it in a loop.</p>
 
-        <div class="codeframe">
-          <div class="codeframe-label">Account allocation (session manager)</div>
-          <pre><code>-- Find the least-loaded account with capacity
-SELECT account_id, COUNT(*) as active_sessions
-FROM agent_sessions
-WHERE status = 'running'
-GROUP BY account_id
-HAVING COUNT(*) < 5
-ORDER BY active_sessions ASC
-LIMIT 1;</code></pre>
-        </div>
-
-        <p>Each account is a distinct Claude Code subscription with its own OAuth credential and its own git author identity (<code>GIT_AUTHOR_EMAIL</code>, <code>GIT_AUTHOR_NAME</code>). Workers spawned under different accounts produce commits attributed to their account — which means a git log on a multi-worker branch will show different authors for different commits, giving a readable audit trail of which session did what.</p>
+        <p>Each seat is a distinct subscription with its own OAuth credential and home directory. A person's own GitHub/Google identity (fine-grained PAT, OAuth grant, connected on Settings → You) is a separate layer from seat rotation — which seat ran the model and who the resulting commit/PR is attributed to are independent choices. See <a href="https://github.com/m1keluka/OperationKit/wiki/Accounts-Subscriptions-and-Seats">Accounts, Subscriptions &amp; Seats</a> for how the two relate.</p>
 
         <div class="note">
           <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
-          <p>True parallelism requires distributing across accounts, not just goroutines. Spawning five workers under the same account queues the fifth. Spawning them across five accounts starts all five immediately. The bottleneck is the per-account session limit, not the server's ability to run concurrent processes.</p>
+          <p>True parallelism requires distributing across seats, not just processes. Spawning several workers under the same seat queues or rate-limits the later ones. Spawning them across pooled seats starts more of them immediately. The bottleneck is the per-seat subscription rate limit, not the server's ability to run concurrent processes — rotation pools capacity you already pay for, it doesn't manufacture more of it.</p>
         </div>
 
-        <p>This concurrency model scales in the same direction as the test-time compute literature. Snell et al. (2024) show that scaling inference-time compute — running more parallel attempts and selecting the best — consistently improves output quality on verifiable tasks. Account rotation is what makes parallel attempts financially and technically feasible: each additional account adds five more concurrent slots, so the system can scale horizontally in increments of five without hitting a single-account ceiling.</p>
+        <p>This concurrency model scales in the same direction as the test-time compute literature. Snell et al. (2024) show that scaling inference-time compute — running more parallel attempts and selecting the best — consistently improves output quality on verifiable tasks. Account rotation is what makes parallel attempts financially and technically feasible: each additional pooled seat adds headroom, so the system scales horizontally without hitting a single subscription's ceiling.</p>
 
         <!-- REFERENCES -->
         <h2 id="references">References</h2>
