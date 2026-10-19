@@ -227,37 +227,37 @@ done</code></pre>
 
         <!-- ACCOUNT ROTATION -->
         <h2 id="account-rotation">Account rotation</h2>
-        <p>Each Claude Code session runs under a distinct system account: <code>ccuser-0</code> through <code>ccuser-4</code>. The session-manager maintains a pool of these accounts and assigns one to each new session, rotating to the next free account when all slots under the current account are occupied.</p>
+        <p>Each coding session runs under a distinct system account, one per pooled subscription seat (Claude, Grok, or Codex). The account-router holds that pool, each seat carrying a priority and its own home directory, and assigns a new session the highest-priority seat that isn't currently rate-limited or flagged for a dead credential. This is the seat-pooling layer described in full on the wiki's <a href="https://github.com/m1keluka/OperationKit/wiki/Accounts-Subscriptions-and-Seats">Accounts, Subscriptions &amp; Seats</a> page — that page is the source of truth for exact seat count and routing rules, which change as seats are added.</p>
 
         <div class="account-grid">
           <div class="account-card">
-            <div class="ac-name">ccuser-0</div>
-            <div class="ac-slots">5 slots</div>
+            <div class="ac-name">Primary</div>
+            <div class="ac-slots">priority 10</div>
           </div>
           <div class="account-card">
-            <div class="ac-name">ccuser-1</div>
-            <div class="ac-slots">5 slots</div>
+            <div class="ac-name">Secondary</div>
+            <div class="ac-slots">priority 0</div>
           </div>
           <div class="account-card">
-            <div class="ac-name">ccuser-2</div>
-            <div class="ac-slots">5 slots</div>
+            <div class="ac-name">Tertiary</div>
+            <div class="ac-slots">priority 0</div>
           </div>
           <div class="account-card">
-            <div class="ac-name">ccuser-3</div>
-            <div class="ac-slots">5 slots</div>
+            <div class="ac-name">Quaternary</div>
+            <div class="ac-slots">priority 0</div>
           </div>
           <div class="account-card">
-            <div class="ac-name">ccuser-4</div>
-            <div class="ac-slots">5 slots</div>
+            <div class="ac-name">…</div>
+            <div class="ac-slots">more seats as added</div>
           </div>
         </div>
 
-        <p>The reason is Anthropic's per-account API rate limits. Claude Code sessions make API calls against the account's Claude subscription. A single account with 25 concurrent sessions would saturate its rate limit budget and begin returning 429s, stalling all sessions simultaneously. Five accounts with 5 sessions each distribute the load: a rate-limit event on one account stalls only its 5 sessions while the other 20 continue.</p>
+        <p>The reason is each subscription's own per-account API rate limits. A single seat running every concurrent session would saturate its own rate-limit budget and start returning 429s, stalling everything at once. Pooling seats distributes that load: a rate-limit event on one seat benches only that seat (tracked with its own reset time) while sessions on the other seats continue. A credential failure (expired or revoked login, a 401) is tracked separately from a rate limit, since it doesn't self-heal on a timer — that seat is parked as "needs reconnect" instead of being retried in a loop.</p>
 
         <h3>What rotation buys</h3>
-        <p>Account rotation is not a reliability mechanism — it doesn't prevent rate limiting, it distributes its blast radius. The practical effect is that the board can sustain 25 concurrent sessions without systematically stalling, as long as no single account's 5 sessions all make simultaneous heavy API calls. In practice this is rare: sessions interleave tool calls (filesystem reads, git operations, API calls) with model inference, and the inference spikes are spread across different phases of different objectives.</p>
+        <p>Account rotation is not a reliability mechanism — it doesn't prevent rate limiting, it distributes its blast radius and keeps work flowing on whichever seats still have headroom. It pools capacity across subscriptions you already hold; it isn't a way to exceed what any single subscription's terms allow.</p>
 
-        <p>Each account has its own tmux server, home directory, and shell environment. This provides incidental isolation: a session under <code>ccuser-2</code> cannot accidentally read <code>ccuser-0</code>'s shell history or environment variables. The worktree guard provides stronger isolation for filesystem writes (see below); account separation is defense-in-depth for the shell layer.</p>
+        <p>Each seat has its own tmux server, home directory, and shell environment. This provides incidental isolation: a session under one seat cannot accidentally read another seat's shell history or environment variables. The worktree guard provides stronger isolation for filesystem writes (see below); account separation is defense-in-depth for the shell layer.</p>
 
         <div class="note">
           <svg class="note-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8.5"/><path d="M10 9v5M10 6.5v.5"/></svg>
